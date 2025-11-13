@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DrawManager
   linePrefab: {fileID: 5538557522160695766, guid: 6cb99494ef98f8944a43d22fa4e0bda9, type: 3}
-  initialPoolSize: 20
+  initialPoolSize: 10
   minDistance: 0.1
   simplificationTolerance: 0.02
 --- !u!4 &1245887761
