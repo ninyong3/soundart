@@ -1,0 +1,141 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.Rendering;
+public class DrawManager : MonoBehaviour
+{
+    [Header("에셋")]
+    public GameObject linePrefab;
+    [Header("오브젝트 풀링")]
+    [Tooltip("미리 생성해 둘 선의 개수")]
+    [SerializeField] private int initialPoolSize = 20;
+    private List<GameObject> linePool;
+    [Header("그리기 설정")]
+    [Tooltip("점을 확정하기 위한 최소 이동 거리")]
+    [SerializeField] private float minDistance = 0.1f;
+    [Header("최적화 설정")]
+    [Tooltip("그리기 끝난 선을 단순화하는 허용 오차(작을수록 원본에 가까움)")]
+    [SerializeField] private float simplificationTolerance = 0.02f;
+    [Header("런타임 중 참조")]
+    private Camera mainCamera;
+    private LineRenderer currentLine;
+    private PlayerControls inputActions;
+    private LineData currentLineData;
+    private Vector3 lastCommittedPosition;
+    private GameObject currentLineObject;
+    private void Awake()
+    {
+        mainCamera=Camera.main;
+        inputActions = new PlayerControls();
+    }
+    private void Start()
+    {
+        InitializePool();
+    }
+    private void OnEnable()
+    {
+        inputActions.Drawing.Enable();
+        inputActions.Drawing.PrimaryContact.started += OnDrawStart; 
+        inputActions.Drawing.PrimaryContact.canceled += OnDrawEnd;
+    }
+    private void OnDisable()
+    {
+        inputActions.Drawing.Disable();
+        inputActions.Drawing.PrimaryContact.started -= OnDrawStart;
+        inputActions.Drawing.PrimaryContact.canceled -= OnDrawEnd;
+    }
+    private void Update()
+    {
+        if (currentLine == null)
+            return;
+        Vector2 pointerPos = inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
+        Vector3 currentWorldPos = GetWorldPosition(pointerPos);
+        UpdateLineVisuals(currentWorldPos);
+        float distance = Vector3.Distance(currentWorldPos, lastCommittedPosition);
+        if(distance < minDistance)
+        {
+            CommitDataPoint(currentWorldPos);
+        }
+    }
+    private void OnDrawStart(InputAction.CallbackContext context) // context 매개 변수에 입력 상세 정보 담김
+    {
+        Vector2 pointerPos=inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
+        CreateNewLine(GetWorldPosition(pointerPos));
+    }
+    private void OnDrawEnd(InputAction.CallbackContext context)
+    {
+        if(currentLine != null)
+        {
+            currentLine.Simplify(simplificationTolerance);
+        }
+        currentLine = null;
+        currentLineData = null;
+        currentLineObject = null;
+    }
+    ///<summary>
+    /// 스크린 좌표를 유니티 월드 좌표로 변환
+    ///</summary>
+    private Vector3 GetWorldPosition(Vector2 screenPosition)
+    {
+        Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, 10f)); // z값은 카메라로부터 10f 떨어진 지점, 즉 0f
+        worldPosition.z = 0f; // 오차 방지 
+        return worldPosition;
+    }
+    private void CreateNewLine(Vector3 startPositon)
+    {
+        currentLineObject=GetLineFromPool();
+        currentLine = currentLineObject.GetComponent<LineRenderer>();
+        currentLineData = currentLineObject.GetComponent<LineData>();
+        currentLine.positionCount = 2;
+        currentLine.SetPosition(0, startPositon); // 두 점을 같은 위치에 찍어 점처럼 보이게 함(실제로는 선)
+        currentLine.SetPosition(1, startPositon);
+        currentLineData.positions.Clear();
+        currentLineData.positions.Add(startPositon);
+        lastCommittedPosition = startPositon;
+    }
+    private void UpdateLineVisuals(Vector3 newPosition)
+    {
+        currentLine.positionCount++;
+        currentLine.SetPosition(currentLine.positionCount-1, newPosition);
+    }
+    ///<summary>
+    ///데이터 인식에 사용할 LineData리스트에 새 확정 점 추가
+    ///</summary>
+    private void CommitDataPoint(Vector3 newPosition)
+    {
+        currentLineData.positions.Add(newPosition);
+        lastCommittedPosition = newPosition;
+    }
+    /// <summary>
+    /// 미리 선을 생성해서 풀에 넣어둠
+    /// </summary>
+    private void InitializePool()
+    {
+        linePool = new List<GameObject>();
+        for(int i=0;i<initialPoolSize;i++)
+        {
+            GameObject lineObj = Instantiate(linePrefab, this.transform);
+            lineObj.SetActive(false);
+            linePool.Add(lineObj);
+        }
+    }
+    /// <summary>
+    /// 풀에서 비활성화된 선을 찾아 반환
+    /// </summary>
+    /// <returns></returns>
+    private GameObject GetLineFromPool()
+    {
+        foreach(GameObject lineObj in linePool)
+        {
+            if(!lineObj.activeInHierarchy)
+            {
+                lineObj.SetActive(true);
+                return lineObj;
+            }
+        }
+        GameObject newLineObj = Instantiate(linePrefab, this.transform); // 풀에 넣어둔 것 다 쓰면 긴급 보충
+        linePool.Add(newLineObj);
+        return newLineObj;
+    }
+}
