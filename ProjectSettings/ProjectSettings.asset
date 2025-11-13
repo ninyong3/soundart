@@ -167,6 +167,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.4
   androidMinAspectRatio: 1
   applicationIdentifier:
+    Android: com.jjw.soundart
     Standalone: com.DefaultCompany.2D-URP
   buildNumber:
     Standalone: 0
@@ -777,7 +778,7 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 2
+  activeInputHandler: 1
   windowsGamepadBackendHint: 0
   cloudProjectId: 4baaeae4-2f39-47fb-932f-7c6badbdf546
   framebufferDepthMemorylessMode: 0

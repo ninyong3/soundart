@@ -251,7 +251,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DrawManager
   linePrefab: {fileID: 5538557522160695766, guid: 6cb99494ef98f8944a43d22fa4e0bda9, type: 3}
-  lineMaterial: {fileID: 0}
+  initialPoolSize: 20
+  minDistance: 0.1
+  simplificationTolerance: 0.02
 --- !u!4 &1245887761
 Transform:
   m_ObjectHideFlags: 0
@@ -515,10 +517,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 885387062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 2160, y: 1080}
+  m_SizeDelta: {x: 240, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1656513371
 MonoBehaviour:
