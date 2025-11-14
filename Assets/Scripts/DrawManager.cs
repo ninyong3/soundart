@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.Rendering;
+using UnityEditor.Experimental.GraphView;
 public class DrawManager : MonoBehaviour
 {
     [Header("에셋")]
@@ -17,6 +18,10 @@ public class DrawManager : MonoBehaviour
     [Header("최적화 설정")]
     [Tooltip("그리기 끝난 선을 단순화하는 허용 오차(작을수록 원본에 가까움)")]
     [SerializeField] private float simplificationTolerance = 0.02f;
+    [Header("영역 설정")]
+    [Tooltip("그리기가 허용되는 영역")]
+    public LayerMask drawingZoneLayer;
+    private bool isDrawing=false;
     [Header("런타임 중 참조")]
     private Camera mainCamera;
     private LineRenderer currentLine;
@@ -24,6 +29,7 @@ public class DrawManager : MonoBehaviour
     private LineData currentLineData;
     private Vector3 lastCommittedPosition;
     private GameObject currentLineObject;
+    private EdgeCollider2D currentEdgeCollider;
     private void Awake()
     {
         mainCamera=Camera.main;
@@ -47,10 +53,15 @@ public class DrawManager : MonoBehaviour
     }
     private void Update()
     {
-        if (currentLine == null)
+        if (!isDrawing)
             return;
         Vector2 pointerPos = inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
         Vector3 currentWorldPos = GetWorldPosition(pointerPos);
+        if(!IsPositionInDrawingZone(currentWorldPos))
+        {
+            EndCurrentLine();
+            return;
+        }
         UpdateLineVisuals(currentWorldPos);
         float distance = Vector3.Distance(currentWorldPos, lastCommittedPosition);
         if(distance < minDistance)
@@ -61,17 +72,19 @@ public class DrawManager : MonoBehaviour
     private void OnDrawStart(InputAction.CallbackContext context) // context 매개 변수에 입력 상세 정보 담김
     {
         Vector2 pointerPos=inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
-        CreateNewLine(GetWorldPosition(pointerPos));
+        Vector3 startPosition=GetWorldPosition(pointerPos);
+        if(!IsPositionInDrawingZone(startPosition))
+        {
+            return;
+        }
+        CreateNewLine(startPosition);
+        isDrawing = true;
     }
     private void OnDrawEnd(InputAction.CallbackContext context)
     {
-        if(currentLine != null)
-        {
-            currentLine.Simplify(simplificationTolerance);
-        }
-        currentLine = null;
-        currentLineData = null;
-        currentLineObject = null;
+       if(!isDrawing)
+            return;
+       EndCurrentLine();
     }
     ///<summary>
     /// 스크린 좌표를 유니티 월드 좌표로 변환
@@ -87,6 +100,8 @@ public class DrawManager : MonoBehaviour
         currentLineObject=GetLineFromPool();
         currentLine = currentLineObject.GetComponent<LineRenderer>();
         currentLineData = currentLineObject.GetComponent<LineData>();
+        currentEdgeCollider = currentLineObject.GetComponent<EdgeCollider2D>();
+        currentEdgeCollider.Reset();
         currentLine.positionCount = 2;
         currentLine.SetPosition(0, startPositon); // 두 점을 같은 위치에 찍어 점처럼 보이게 함(실제로는 선)
         currentLine.SetPosition(1, startPositon);
@@ -98,6 +113,12 @@ public class DrawManager : MonoBehaviour
     {
         currentLine.positionCount++;
         currentLine.SetPosition(currentLine.positionCount-1, newPosition);
+        List<Vector2> points = new List<Vector2>();
+        for (int i = 0; i < currentLine.positionCount; i++)
+        {
+            points.Add(currentLine.GetPosition(i));
+        }
+        currentEdgeCollider.SetPoints(points);
     }
     ///<summary>
     ///데이터 인식에 사용할 LineData리스트에 새 확정 점 추가
@@ -137,5 +158,26 @@ public class DrawManager : MonoBehaviour
         GameObject newLineObj = Instantiate(linePrefab, this.transform); // 풀에 넣어둔 것 다 쓰면 긴급 보충
         linePool.Add(newLineObj);
         return newLineObj;
+    }
+    ///<summary>
+    ///현재 그리던 선을 종료 및 정리(손 떼기 및 영역 이탈 시)
+    ///</summary>
+    private void EndCurrentLine()
+    {
+        if (currentLine != null)
+        {
+            currentLine.Simplify(simplificationTolerance);
+        }
+        currentLine = null;
+        currentLineData = null;
+        currentLineObject = null;
+        isDrawing = false;
+    }
+    ///<summary>
+    ///특정 좌표가 그리기 영역의 충돌 영역에 있는지 확인
+    ///</summary>
+    private bool IsPositionInDrawingZone(Vector3 position)
+    {
+        return Physics2D.OverlapPoint(position, drawingZoneLayer); // 해당하는 레이어를 가진 콜라이더 확인
     }
 }
