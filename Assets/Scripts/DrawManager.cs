@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.Rendering;
 using UnityEditor.Experimental.GraphView;
+using Unity.Mathematics;
+using UnityEngine.Splines;
 public class DrawManager : MonoBehaviour
 {
     [Header("에셋")]
@@ -19,8 +21,10 @@ public class DrawManager : MonoBehaviour
     [Tooltip("그리기 끝난 선을 단순화하는 허용 오차(작을수록 원본에 가까움)")]
     [SerializeField] private float simplificationTolerance = 0.02f;
     [Header("영역 설정")]
-    [Tooltip("그리기가 허용되는 영역")]
-    public LayerMask drawingZoneLayer;
+    [Tooltip("따라 그려야 할 스플라인 길")]
+    public SplineContainer trackPath;
+    [Tooltip("경로에서 벗어나도 되는 최대 허용 거리")]
+    public float maxTraceDistance = 0.4f;
     private bool isDrawing=false;
     [Header("런타임 중 참조")]
     private Camera mainCamera;
@@ -38,6 +42,10 @@ public class DrawManager : MonoBehaviour
     private void Start()
     {
         InitializePool();
+        if(trackPath == null)
+        {
+            Debug.LogWarning("!!! DrawManager에 trackPath 스플라인이 연결되지 않았어요!!!");
+        }
     }
     private void OnEnable()
     {
@@ -174,10 +182,22 @@ public class DrawManager : MonoBehaviour
         isDrawing = false;
     }
     ///<summary>
-    ///특정 좌표가 그리기 영역의 충돌 영역에 있는지 확인
+    ///특정 좌표가 경로의 허용 범위 내에 있는지 판단
     ///</summary>
-    private bool IsPositionInDrawingZone(Vector3 position)
+    public bool IsPositionInDrawingZone(Vector3 position)
     {
-        return Physics2D.OverlapPoint(position, drawingZoneLayer); // 해당하는 레이어를 가진 콜라이더 확인
+        if(trackPath == null || trackPath.Spline == null)
+        {
+            return true;
+        }
+        Vector3 localPosition=trackPath.transform.InverseTransformPoint(position);
+        Spline spline=trackPath.Spline;
+        if(spline.Count < 2) // 점 2개 미만이면 선이 아님
+            return false;
+        float3 nearestPoint;
+        float t;
+        SplineUtility.GetNearestPoint(spline, (float3)localPosition, out nearestPoint, out t);
+        float distance=Vector3.Distance(localPosition, nearestPoint); // 현재 좌표와 경로의 최단 거리
+        return distance <= maxTraceDistance; // 거리가 최대 허용 거리보다 작으면 true
     }
 }
