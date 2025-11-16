@@ -20,7 +20,7 @@ public class TargetPoint : MonoBehaviour
     [Header("판정 설정")]
     public float timeWindow = 0.5f;
     [Tooltip("이전 노트에서 값만큼 가까이에서 시작해야 인정")]
-    public float startThreshold = 0.5f;
+    public float startThreshold = 0.6f;
     [Header("시각화 설정")]
     [Tooltip("줄어드는 원 오브젝트(타이밍 알려주는 용도)")]
     public Transform approachCircle;

@@ -225,8 +225,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aede3fb5f4153374cbb949b700ed97fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activationTime: 3
+  myEvents: []
   timeWindow: 0.5
+  startThreshold: 0.5
   approachCircle: {fileID: 7276423412975249736}
   approachTime: 1
   startScale: 2
