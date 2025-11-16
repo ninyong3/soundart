@@ -137,11 +137,11 @@ public class TargetPoint : MonoBehaviour
             Debug.LogWarning("[판정 실패] 순서 불일치!");
             return;
         }
-        if (currentEvent.requiredSpline != null && thisLine.drawnOnSpline != currentEvent.requiredSpline)
+      /*  if (currentEvent.requiredSpline != null && thisLine.drawnOnSpline != currentEvent.requiredSpline)
         {
             Debug.LogWarning($"[판정 실패] '길' 불일치! (필요: {currentEvent.requiredSpline.name}, 실제: {thisLine.drawnOnSpline?.name})");
             return;
-        }
+        }*/
         if (requiredNote == null)
         {
             SetHit();
