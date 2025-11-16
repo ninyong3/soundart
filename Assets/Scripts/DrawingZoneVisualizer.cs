@@ -1,6 +1,4 @@
 using UnityEngine;
-using System.Linq;
-using UnityEditor.Rendering;
 /// <summary>
 /// 게임이 시작될 때 충돌 영역 면 시각화
 /// </summary>

@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
-using System.Collections;
-using UnityEngine.Rendering;
-using UnityEditor.Experimental.GraphView;
 using Unity.Mathematics;
 using UnityEngine.Splines;
 public class DrawManager : MonoBehaviour

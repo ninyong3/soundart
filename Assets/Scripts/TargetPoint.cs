@@ -1,7 +1,5 @@
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UIElements;
 public enum NoteState
 {
     Idle, // 대기중(비활성화)

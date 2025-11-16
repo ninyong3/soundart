@@ -1,12 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
-using System.Linq;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Security;
-using System.Net.NetworkInformation;
-using System;
 /// <summary>
 /// 개인 악보 시스템
 /// </summary>
