@@ -21,8 +21,8 @@ public class DrawManager : MonoBehaviour
     [Tooltip("그리기 끝난 선을 단순화하는 허용 오차(작을수록 원본에 가까움)")]
     [SerializeField] private float simplificationTolerance = 0.02f;
     [Header("영역 설정")]
-    [Tooltip("따라 그려야 할 스플라인 길")]
-    public SplineContainer trackPath;
+    [Tooltip("따라 그려야 할 모든 스플라인 길 목록")]
+    public List<SplineContainer> allTrackPaths;
     [Tooltip("경로에서 벗어나도 되는 최대 허용 거리")]
     public float maxTraceDistance = 0.4f;
     private bool isDrawing=false;
@@ -42,7 +42,7 @@ public class DrawManager : MonoBehaviour
     private void Start()
     {
         InitializePool();
-        if(trackPath == null)
+        if(allTrackPaths == null || allTrackPaths.Count == 0)
         {
             Debug.LogWarning("!!! DrawManager에 trackPath 스플라인이 연결되지 않았어요!!!");
         }
@@ -65,7 +65,7 @@ public class DrawManager : MonoBehaviour
             return;
         Vector2 pointerPos = inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
         Vector3 currentWorldPos = GetWorldPosition(pointerPos);
-        if(!IsPositionInDrawingZone(currentWorldPos))
+        if(!IsPositionInDrawingZone(currentWorldPos, out SplineContainer _)) // splineContainer는 버리기
         {
             EndCurrentLine();
             return;
@@ -81,7 +81,7 @@ public class DrawManager : MonoBehaviour
     {
         Vector2 pointerPos=inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
         Vector3 startPosition=GetWorldPosition(pointerPos);
-        if(!IsPositionInDrawingZone(startPosition))
+        if(!IsPositionInDrawingZone(startPosition, out SplineContainer _))
         {
             return;
         }
@@ -105,9 +105,11 @@ public class DrawManager : MonoBehaviour
     }
     private void CreateNewLine(Vector3 startPositon)
     {
+        IsPositionInDrawingZone(startPositon, out SplineContainer startedSpline);
         currentLineObject=GetLineFromPool();
         currentLine = currentLineObject.GetComponent<LineRenderer>();
         currentLineData = currentLineObject.GetComponent<LineData>();
+        currentLineData.drawnOnSpline = startedSpline;
         currentEdgeCollider = currentLineObject.GetComponent<EdgeCollider2D>();
         currentEdgeCollider.Reset();
         currentLine.positionCount = 2;
@@ -182,22 +184,33 @@ public class DrawManager : MonoBehaviour
         isDrawing = false;
     }
     ///<summary>
-    ///특정 좌표가 경로의 허용 범위 내에 있는지 판단
+    ///특정 좌표가 여러 경로 중 하나라도 허용 범위 내에  있는지 판단
     ///</summary>
-    public bool IsPositionInDrawingZone(Vector3 position)
+    public bool IsPositionInDrawingZone(Vector3 position, out SplineContainer foundSpline)
     {
-        if(trackPath == null || trackPath.Spline == null)
+        foundSpline = null;
+        if(allTrackPaths == null || allTrackPaths.Count == 0)
         {
             return true;
         }
-        Vector3 localPosition=trackPath.transform.InverseTransformPoint(position);
-        Spline spline=trackPath.Spline;
-        if(spline.Count < 2) // 점 2개 미만이면 선이 아님
-            return false;
-        float3 nearestPoint;
-        float t;
-        SplineUtility.GetNearestPoint(spline, (float3)localPosition, out nearestPoint, out t);
-        float distance=Vector3.Distance(localPosition, nearestPoint); // 현재 좌표와 경로의 최단 거리
-        return distance <= maxTraceDistance; // 거리가 최대 허용 거리보다 작으면 true
+        foreach (SplineContainer trackPath in allTrackPaths)
+        {
+            if (trackPath == null || trackPath.Spline == null)
+                continue;
+            Vector3 localPosition = trackPath.transform.InverseTransformPoint(position);
+            Spline spline = trackPath.Spline;
+            if (spline.Count < 2) // 점 2개 미만이면 선이 아님
+                continue;
+            float3 nearestPoint;
+            float t;
+            SplineUtility.GetNearestPoint(spline, (float3)localPosition, out nearestPoint, out t);
+            float distance = Vector3.Distance(localPosition, nearestPoint); // 현재 좌표와 경로의 최단 거리
+            if (distance <= maxTraceDistance)
+            {
+                foundSpline = trackPath;
+                return true;
+            }
+        }
+        return false;
     }
 }

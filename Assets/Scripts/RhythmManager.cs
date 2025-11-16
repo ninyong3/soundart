@@ -1,8 +1,14 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
 using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security;
+using System.Net.NetworkInformation;
+using System;
 /// <summary>
-/// 게임의 현재 시간(음악 재생 시간) 관리 및 포인트들에게 전달
+/// 개인 악보 시스템
 /// </summary>
 public class RhythmManager : MonoBehaviour
 {
@@ -11,69 +17,41 @@ public class RhythmManager : MonoBehaviour
     public float songPosition;
     [Tooltip("음악 재생 속도 (1.0 = 100%)")]
     public float playbackSpeed = 1.0f;
-    [Header("루프 설정")]
-    [Tooltip("체크하면, 마지막 노트가 첫 노트로 이어짐")]
-    public bool isLooping = true;
-    [Header("참조")]
-    [Tooltip("모든 포인트(노트)")]
+    [Header("UI 설정")]
+    public GameObject clearPanel;
+    public GameObject overPanel;
+    [Tooltip("실패 개수를 표시할 텍스트")]
+    public TextMeshProUGUI missCountText;
+    private int totalEventCount = 0; // 전체 노트 개수
+    private int processedEventCount = 0; // 지금까지 처리한 개수
+    private int missCount = 0; // 실패 횟수
+    private TargetPoint lastProcessedNote = null;
     private TargetPoint[] allTargetPoints;
-    private int currentNoteIndex = 0; // 현재 활성화되어야 할 노트(순서)
-    private TargetPoint lastHitNote = null;
-    private float songLoopDuration;
+    private bool isGameEnded = false;
     private void Start()
     {
-        TargetPoint[] foundTargets = FindObjectsByType<TargetPoint>(FindObjectsSortMode.None);
-        allTargetPoints = foundTargets.OrderBy(target => target.activationTime).ToArray(); // 노트 순서대로 정렬
-        Debug.Log("RhythmManager: TargetPoint " + allTargetPoints.Length + "개를 찾았습니다.");
-        if(allTargetPoints.Length > 0)
+        allTargetPoints = FindObjectsByType<TargetPoint>(FindObjectsSortMode.None);
+        totalEventCount = 0;
+        foreach (TargetPoint note in allTargetPoints)
         {
-            TargetPoint lastNote = allTargetPoints[allTargetPoints.Length - 1];
-            songLoopDuration = lastNote.activationTime + (lastNote.timeWindow / 2f); // 마지막 노트 0.25초 시점
+            if (note.myEvents != null)
+            {
+                totalEventCount += note.myEvents.Count;
+            }
         }
-        else
-        {
-            songLoopDuration = 10f;
-        }
+        Debug.Log($"총 이벤트 개수: {totalEventCount}개");
         ResetAllTargets();
     }
     private void Update()
     {
-        songPosition += Time.deltaTime * playbackSpeed; //  차후 노래 생기면 audio.time으로 교체
-        if (!this.enabled)
-            return;
-        for (int i = 0; i < allTargetPoints.Length; i++)
+        if (isGameEnded)
         {
-            bool isMyTurn = (i == currentNoteIndex); //현재 노트가 i와 같을 때만 true
-            allTargetPoints[i].UpdateTiming(songPosition, isMyTurn);
-        }
-        if (currentNoteIndex >= allTargetPoints.Length)
             return;
-        TargetPoint currentNote = allTargetPoints[currentNoteIndex]; // 현재 차례인 노트 상태 확인
-        NoteState state=currentNote.GetState();
-        if (state == NoteState.Hit || state == NoteState.Missed)
-        { 
-            if(state == NoteState.Hit)
-            {
-                lastHitNote = currentNote;
-            }
-            else
-            {
-                lastHitNote = null;
-            }
-            currentNoteIndex++;
-            if(isLooping && currentNoteIndex >= allTargetPoints.Length)
-            {
-                currentNoteIndex = 0;
-                foreach(TargetPoint note in allTargetPoints)
-                {
-                    note.AdvanceLoop(songLoopDuration);
-                }
-            }
-            else if(!isLooping && currentNoteIndex == allTargetPoints.Length)
-            {
-                Debug.Log("게임 클리어");
-                this.enabled = false;
-            }
+        }
+        songPosition += Time.deltaTime * playbackSpeed; //  차후 노래 생기면 audio.time으로 교체
+        foreach (TargetPoint note in allTargetPoints)
+        {
+            note.UpdateTiming(songPosition);
         }
     }
     ///<summary>
@@ -82,22 +60,71 @@ public class RhythmManager : MonoBehaviour
     public void ResetAllTargets()
     {
         songPosition = 0f; // 시간 초기화
-        currentNoteIndex = 0;
-        foreach(TargetPoint target in allTargetPoints)
+        lastProcessedNote = null;
+        processedEventCount = 0;
+        missCount = 0;
+        isGameEnded = false;
+        if(clearPanel != null)
+            clearPanel.SetActive(false);
+        if(overPanel != null) 
+            overPanel.SetActive(false);
+        if(missCountText != null)
+            missCountText.text="";
+        if (allTargetPoints != null)
         {
-            target.ResetTarget();
+            foreach (TargetPoint target in allTargetPoints)
+            {
+                target.ResetTarget();
+            }
         }
-        if (isLooping && allTargetPoints != null && allTargetPoints.Length > 0)
+        if (clearPanel != null)
+            clearPanel.SetActive(false);
+        if (overPanel != null)
+            overPanel.SetActive(false);
+    }
+    /// <summary>
+    /// 노트가 성공했을 때 자신을 마지막 성공 노트로 등록
+    /// </summary>
+    public void ReportNoteFinished(TargetPoint note, bool isMissed)
+    {
+        lastProcessedNote = note;
+        processedEventCount++;
+        if (isMissed)
         {
-            lastHitNote = allTargetPoints[allTargetPoints.Length - 1];
+            missCount++;
+        }
+        if (processedEventCount >= totalEventCount)
+        {
+            FinishGame();
+        }
+    }
+    public TargetPoint GetLastProcessedNote()
+    {
+        return lastProcessedNote;
+    }
+    private void FinishGame()
+    {
+        isGameEnded = true;
+        Debug.Log($"게임 종료! (실패: {missCount}개)");
+        if (missCount > 0)
+        {
+            Debug.Log(" Game Over...");
+            if (overPanel != null)
+                overPanel.SetActive(true);
+            if(missCountText != null)
+            {
+                missCountText.text = "Missed: " + missCount;
+            }
         }
         else
         {
-            lastHitNote = null; 
+            Debug.Log(" Game Clear! ");
+            if (clearPanel != null)
+                clearPanel.SetActive(true);
         }
     }
-    public TargetPoint GetLastHitNote()
+    public void RetryGame()
     {
-        return lastHitNote;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

@@ -1,5 +1,7 @@
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine.UIElements;
 public enum NoteState
 {
     Idle, // 대기중(비활성화)
@@ -12,12 +14,11 @@ public enum NoteState
 /// </summary>
 public class TargetPoint : MonoBehaviour
 {
-    [Header("타이밍 설정")]
-    [Tooltip("노트가 활성화되는 정확한 시간 (초)")]
-    public float activationTime = 3.0f;
-    [Tooltip("판정 유효 시간(반만큼 앞 뒤 시간)")]
-    public float timeWindow = 0.5f;
+    [Header("개인 악보")]
+    [Tooltip("이 노트가 활성화 될 모든 시간과 조건 목록")]
+    public List<RhythmEvent> myEvents;
     [Header("판정 설정")]
+    public float timeWindow = 0.5f;
     [Tooltip("이전 노트에서 값만큼 가까이에서 시작해야 인정")]
     public float startThreshold = 0.5f;
     [Header("시각화 설정")]
@@ -30,55 +31,70 @@ public class TargetPoint : MonoBehaviour
     private NoteState currentState=NoteState.Idle;
     private SpriteRenderer spriteRenderer;
     private RhythmManager rhythmManager;
+    private int currentEventIndex = 0;
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.color = Color.gray*0.5f; // 시작 시 대기 중 색깔로 지정
     }
     private void Start()
     {
-        rhythmManager=FindFirstObjectByType<RhythmManager>();  
+        rhythmManager=FindFirstObjectByType<RhythmManager>();
+        ResetTarget();
     }
     /// <summary>
-    /// RhythmManager에서 현재 시간 받아 상태 갱신
+    /// RhythmManager에서 현재 시간 받아 개인 악보 보고 상태 갱신
     /// </summary>
-    public void UpdateTiming(float currentSongPosition, bool isMyTurn)
+    public void UpdateTiming(float currentSongPosition)
     {
-        if (currentState == NoteState.Hit || currentState == NoteState.Missed)
+        if (currentEventIndex >= myEvents.Count)
         {
             if (approachCircle != null)
-            {
                 approachCircle.gameObject.SetActive(false);
-            }
             return;
         }
-        if (!isMyTurn)
-        {
-            currentState = NoteState.Idle;
-            spriteRenderer.color = Color.gray * 0.5f;
-            if (approachCircle != null)
-            {
-                approachCircle.gameObject.SetActive(false);
-            }
-            return;
-        }
+        RhythmEvent currentEvent = myEvents[currentEventIndex];
+        float myActivationTime = currentEvent.activationTime;
         if (approachCircle != null)
         {
-            float timeRemaining = activationTime - currentSongPosition;
+            float timeRemaining = myActivationTime - currentSongPosition;
             float progress = 1f - (timeRemaining / approachTime); // 0부터 1까지, 1이 쳐야하는 시점
-            if (progress < 0f)
+            if (currentState == NoteState.Idle || currentState == NoteState.Active)
             {
-                approachCircle.gameObject.SetActive(false);
+                if (progress < 0f || progress > 1.1f) // 너무 멀면 숨긴다
+                {
+                    approachCircle.gameObject.SetActive(false);
+                }
+                else
+                {
+                    approachCircle.gameObject.SetActive(true);
+                    float currentScale = Mathf.Lerp(startScale, 1.0f, progress);
+                    approachCircle.localScale = Vector3.one * currentScale;
+                }
             }
             else
             {
-                approachCircle.gameObject.SetActive(true);
-                float currentScale = Mathf.Lerp(startScale, 1.0f, progress);
-                approachCircle.localScale = Vector3.one * currentScale;
+                approachCircle.gameObject.SetActive(false);
             }
         }
-        float windowStart = activationTime - (timeWindow / 2); // 유효 시간 계산
-        float windowEnd = activationTime + (timeWindow / 2);
+        TargetPoint lastNote=rhythmManager.GetLastProcessedNote();
+        TargetPoint requiredNote = currentEvent.requiredPreviousNote;
+        bool isMyTurn=(requiredNote == lastNote);
+        if (!isMyTurn)
+        {
+            if (currentState == NoteState.Active)
+            {
+                currentState = NoteState.Idle;
+                spriteRenderer.color = Color.gray * 0.5f;
+            }
+            return;
+        }
+        if (currentState == NoteState.Hit || currentState == NoteState.Missed)
+        {
+            currentState = NoteState.Idle;
+            spriteRenderer.color = Color.gray * 0.5f;
+        }
+        float windowStart = myActivationTime - (timeWindow / 2); // 유효 시간 계산
+        float windowEnd = myActivationTime + (timeWindow / 2);
         if (currentSongPosition >= windowStart && currentSongPosition <= windowEnd)
         {
             if (currentState == NoteState.Idle)
@@ -91,8 +107,11 @@ public class TargetPoint : MonoBehaviour
         {
             if (currentState == NoteState.Active || currentState == NoteState.Idle)
             {
+                Debug.Log("Missed! (시간 초과)");
                 currentState = NoteState.Missed; // 지나침(실패)
                 spriteRenderer.color = Color.red;
+                rhythmManager.ReportNoteFinished(this, true);
+                currentEventIndex++;
             }
         }
     }
@@ -110,45 +129,54 @@ public class TargetPoint : MonoBehaviour
             return;
         }
         LineData thisLine = other.GetComponent<LineData>(); // 지금 날 친 선
-        TargetPoint lastHitNote = rhythmManager.GetLastHitNote();
-        if (lastHitNote == null)
+        RhythmEvent currentEvent=myEvents[currentEventIndex];
+        TargetPoint requiredNote = currentEvent.requiredPreviousNote;
+        TargetPoint lastNote = rhythmManager.GetLastProcessedNote();
+        if (requiredNote != lastNote && requiredNote != null)
         {
-            SetHit(thisLine);
+            Debug.LogWarning("[판정 실패] 순서 불일치!");
+            return;
+        }
+        if (currentEvent.requiredSpline != null && thisLine.drawnOnSpline != currentEvent.requiredSpline)
+        {
+            Debug.LogWarning($"[판정 실패] '길' 불일치! (필요: {currentEvent.requiredSpline.name}, 실제: {thisLine.drawnOnSpline?.name})");
+            return;
+        }
+        if (requiredNote == null)
+        {
+            SetHit();
         }
         else
         {
             Vector3 lineStartPosition = thisLine.positions[0];
-            Vector3 lastNotePosition = lastHitNote.transform.position;
+            Vector3 lastNotePosition = requiredNote.transform.position;
             float distance = Vector3.Distance(lineStartPosition, lastNotePosition);
             if (distance <= startThreshold)
             {
-                SetHit(thisLine);
+                SetHit();
             }
             else
             {
-                Debug.LogWarning("선이 이전 노트에서 시작하지 않았어요! (무시)");
+                 Debug.LogWarning("선이 이전 노트에서 시작하지 않았어요! (무시)");
             }
         }
     }
-    private void SetHit(LineData line)
+    private void SetHit()
     {
-        Debug.Log("타겟 포인트 적중! (시간: " + activationTime + ")");
+        Debug.Log("타겟 포인트 적중!");
         currentState = NoteState.Hit;
         spriteRenderer.color = Color.green;
+        rhythmManager.ReportNoteFinished(this, false);
+        currentEventIndex++;
     }
     public void ResetTarget()
     {
+        currentEventIndex = 0;
         currentState = NoteState.Idle;
         spriteRenderer.color = Color.gray * 0.5f;
         if (approachCircle != null)
         {
             approachCircle.gameObject.SetActive(false);
-            approachCircle.localScale = Vector3.one * startScale;
         }
-    }
-    public void AdvanceLoop(float loopDuration)
-    {
-        this.activationTime += loopDuration;
-        ResetTarget();
     }
 }
