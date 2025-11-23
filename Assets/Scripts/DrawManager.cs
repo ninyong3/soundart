@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine.Splines;
+using UnityEngine.EventSystems;
 public class DrawManager : MonoBehaviour
 {
     [Header("에셋")]
@@ -47,17 +48,37 @@ public class DrawManager : MonoBehaviour
     private void OnEnable()
     {
         inputActions.Drawing.Enable();
-        inputActions.Drawing.PrimaryContact.started += OnDrawStart; 
-        inputActions.Drawing.PrimaryContact.canceled += OnDrawEnd;
     }
     private void OnDisable()
     {
         inputActions.Drawing.Disable();
-        inputActions.Drawing.PrimaryContact.started -= OnDrawStart;
-        inputActions.Drawing.PrimaryContact.canceled -= OnDrawEnd;
     }
     private void Update()
     {
+        if (Time.timeScale == 0f)
+            return;
+        if(inputActions.Drawing.PrimaryContact.WasPressedThisFrame())
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+            Vector2 screenPosition = inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
+            Vector3 startPosition = GetWorldPosition(screenPosition);
+            if (!IsPositionInDrawingZone(startPosition, out SplineContainer _))
+            {
+                return;
+            }
+            CreateNewLine(startPosition);
+            isDrawing = true;
+        }
+        if(inputActions.Drawing.PrimaryContact.WasReleasedThisFrame())
+        {
+            if (!isDrawing)
+                return;
+            EndCurrentLine();
+            return;
+        }
         if (!isDrawing)
             return;
         Vector2 pointerPos = inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
@@ -73,23 +94,6 @@ public class DrawManager : MonoBehaviour
         {
             CommitDataPoint(currentWorldPos);
         }
-    }
-    private void OnDrawStart(InputAction.CallbackContext context) // context 매개 변수에 입력 상세 정보 담김
-    {
-        Vector2 pointerPos=inputActions.Drawing.PointerPosition.ReadValue<Vector2>();
-        Vector3 startPosition=GetWorldPosition(pointerPos);
-        if(!IsPositionInDrawingZone(startPosition, out SplineContainer _))
-        {
-            return;
-        }
-        CreateNewLine(startPosition);
-        isDrawing = true;
-    }
-    private void OnDrawEnd(InputAction.CallbackContext context)
-    {
-       if(!isDrawing)
-            return;
-       EndCurrentLine();
     }
     ///<summary>
     /// 스크린 좌표를 유니티 월드 좌표로 변환

@@ -1,11 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using Unity.VisualScripting;
 /// <summary>
 /// 개인 악보 시스템
 /// </summary>
 public class RhythmManager : MonoBehaviour
 {
+    public bool isGameStarted=false;
+    public static bool isRetry = false;
     [Header("타이밍")]
     [Tooltip("현재 음악 재생 시간 (초)")]
     public float songPosition;
@@ -14,6 +17,8 @@ public class RhythmManager : MonoBehaviour
     [Header("UI 설정")]
     public GameObject clearPanel;
     public GameObject overPanel;
+    public GameObject pausePanel;
+    private bool isPaused=false;
     [Tooltip("실패 개수를 표시할 텍스트")]
     public TextMeshProUGUI missCountText;
     private int totalEventCount = 0; // 전체 노트 개수
@@ -37,8 +42,8 @@ public class RhythmManager : MonoBehaviour
         ResetAllTargets();
     }
     private void Update()
-    {
-        if (isGameEnded)
+    { 
+        if (isGameEnded || isPaused || !isGameStarted)
         {
             return;
         }
@@ -119,6 +124,22 @@ public class RhythmManager : MonoBehaviour
     }
     public void RetryGame()
     {
+        Time.timeScale = 1f;
+        isRetry = true;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+    public void TogglePause()
+    {
+        isPaused = !isPaused; // 상태 뒤집기
+        if(pausePanel != null)
+        {
+            pausePanel.SetActive(isPaused);
+        }
+        Time.timeScale = isPaused ? 0f : 1f;
+    }
+    public void GameStart()
+    {
+        isGameStarted = true;
+        Debug.Log("게임 시작!");
     }
 }
