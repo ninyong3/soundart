@@ -26,6 +26,8 @@ public class TargetPoint : MonoBehaviour
     public float approachTime = 1.0f; // 1초 전부터 줄어듦
     [Tooltip("원의 시작 크기 배율")]
     public float startScale = 2.0f;
+    [Tooltip("이번 차례에 카메라 이동을 이미 명령했는지 확인하는 플래그")]
+    private bool hasMovedCameraForThisEvent=false;
     private NoteState currentState=NoteState.Idle;
     private SpriteRenderer spriteRenderer;
     private RhythmManager rhythmManager;
@@ -76,7 +78,7 @@ public class TargetPoint : MonoBehaviour
         }
         TargetPoint lastNote=rhythmManager.GetLastProcessedNote();
         TargetPoint requiredNote = currentEvent.requiredPreviousNote;
-        bool isMyTurn=(requiredNote == lastNote);
+        bool isMyTurn= (requiredNote == null) || (requiredNote == lastNote);
         if (!isMyTurn)
         {
             if (currentState == NoteState.Active)
@@ -99,6 +101,7 @@ public class TargetPoint : MonoBehaviour
             {
                 currentState = NoteState.Active; // 활성화
                 spriteRenderer.color = Color.white;
+                TriggerCameraMoveOnTurn();
             }
         }
         else if (currentSongPosition > windowEnd)
@@ -108,8 +111,10 @@ public class TargetPoint : MonoBehaviour
                 Debug.Log("Missed! (시간 초과)");
                 currentState = NoteState.Missed; // 지나침(실패)
                 spriteRenderer.color = Color.red;
+                ScoreManager.Instance.ResetCombo();
                 rhythmManager.ReportNoteFinished(this, true);
                 currentEventIndex++;
+                hasMovedCameraForThisEvent = false;
             }
         }
     }
@@ -163,9 +168,17 @@ public class TargetPoint : MonoBehaviour
     {
         Debug.Log("타겟 포인트 적중!");
         currentState = NoteState.Hit;
+        float currentSongPosition = rhythmManager.songPosition;
+        float myActivationTime = myEvents[currentEventIndex].activationTime;
+        float timeDifference = Mathf.Abs(myActivationTime - currentSongPosition);
+        if (timeDifference <= 0.1f)
+            ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Perfect);
+        else
+            ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Good);
         spriteRenderer.color = Color.green;
         rhythmManager.ReportNoteFinished(this, false);
         currentEventIndex++;
+        hasMovedCameraForThisEvent = false;
     }
     public void ResetTarget()
     {
@@ -176,5 +189,16 @@ public class TargetPoint : MonoBehaviour
         {
             approachCircle.gameObject.SetActive(false);
         }
+    }
+    private void TriggerCameraMoveOnTurn()
+    {
+        if (hasMovedCameraForThisEvent)
+            return;
+        RhythmEvent currentEvent = myEvents[currentEventIndex];
+        if (currentEvent.triggerCameraMove)
+        {
+            CameraController.Instance.MoveToView(currentEvent.moveCameraToIndex);
+        }
+        hasMovedCameraForThisEvent = true;
     }
 }

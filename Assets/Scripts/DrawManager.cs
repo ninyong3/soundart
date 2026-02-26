@@ -196,20 +196,22 @@ public class DrawManager : MonoBehaviour
         }
         foreach (SplineContainer trackPath in allTrackPaths)
         {
-            if (trackPath == null || trackPath.Spline == null)
+            if (trackPath == null || trackPath.Spline.Count == null)
                 continue;
             Vector3 localPosition = trackPath.transform.InverseTransformPoint(position);
-            Spline spline = trackPath.Spline;
-            if (spline.Count < 2) // 점 2개 미만이면 선이 아님
-                continue;
-            float3 nearestPoint;
-            float t;
-            SplineUtility.GetNearestPoint(spline, (float3)localPosition, out nearestPoint, out t);
-            float distance = Vector3.Distance(localPosition, nearestPoint); // 현재 좌표와 경로의 최단 거리
-            if (distance <= maxTraceDistance)
+            foreach (Spline spline in trackPath.Splines)
             {
-                foundSpline = trackPath;
-                return true;
+                if (spline.Count < 2) // 점 2개 미만이면 선이 아님
+                    continue;
+                float3 nearestPoint;
+                float t;
+                SplineUtility.GetNearestPoint(spline, (float3)localPosition, out nearestPoint, out t);
+                float distance = Vector3.Distance(localPosition, nearestPoint); // 현재 좌표와 경로의 최단 거리
+                if (distance <= maxTraceDistance)
+                {
+                    foundSpline = trackPath;
+                    return true;
+                }
             }
         }
         return false;
