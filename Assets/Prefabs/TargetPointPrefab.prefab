@@ -116,7 +116,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.066, y: -0.0853, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7276423412975249736}
@@ -225,9 +225,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aede3fb5f4153374cbb949b700ed97fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myEvents: []
+  myEvents:
+  - activationTime: 0
+    requiredPreviousNote: {fileID: 0}
+    requiredSpline: {fileID: 0}
+    triggerCameraMove: 1
+    moveCameraToIndex: 1
+  - activationTime: 19
+    requiredPreviousNote: {fileID: 0}
+    requiredSpline: {fileID: 0}
+    triggerCameraMove: 0
+    moveCameraToIndex: 0
+  - activationTime: 35
+    requiredPreviousNote: {fileID: 0}
+    requiredSpline: {fileID: 0}
+    triggerCameraMove: 0
+    moveCameraToIndex: 0
   timeWindow: 0.5
-  startThreshold: 0.5
+  startThreshold: 2
   approachCircle: {fileID: 7276423412975249736}
-  approachTime: 1
+  approachTime: 0.6
   startScale: 2

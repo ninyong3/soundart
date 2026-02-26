@@ -174,7 +174,7 @@ public class DrawManager : MonoBehaviour
     ///현재 그리던 선을 종료 및 정리(손 떼기 및 영역 이탈 시)
     ///</summary>
     private void EndCurrentLine()
-    {
+    { 
         if (currentLine != null)
         {
             currentLine.Simplify(simplificationTolerance);

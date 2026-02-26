@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
-using Unity.VisualScripting;
+using UnityEngine.InputSystem;
 /// <summary>
 /// 개인 악보 시스템
 /// </summary>
@@ -27,6 +27,8 @@ public class RhythmManager : MonoBehaviour
     private TargetPoint lastProcessedNote = null;
     private TargetPoint[] allTargetPoints;
     private bool isGameEnded = false;
+    public AudioSource audioSource;
+    private bool isPlaying = false;
     private void Start()
     {
         allTargetPoints = FindObjectsByType<TargetPoint>(FindObjectsSortMode.None);
@@ -42,12 +44,16 @@ public class RhythmManager : MonoBehaviour
         ResetAllTargets();
     }
     private void Update()
-    { 
-        if (isGameEnded || isPaused || !isGameStarted)
+    {
+#if UNITY_EDITOR
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && audioSource.isPlaying)
+            Debug.Log($"[채보 기록] 노트 시간: {audioSource.time}");
+#endif
+        if (isGameEnded || isPaused || !isGameStarted || audioSource == null)
         {
             return;
         }
-        songPosition += Time.deltaTime * playbackSpeed; //  차후 노래 생기면 audio.time으로 교체
+        songPosition = audioSource.time;
         foreach (TargetPoint note in allTargetPoints)
         {
             note.UpdateTiming(songPosition);
@@ -141,5 +147,10 @@ public class RhythmManager : MonoBehaviour
     {
         isGameStarted = true;
         Debug.Log("게임 시작!");
+        if (audioSource != null && audioSource.clip != null)
+        {
+            audioSource.Play();
+            isPlaying = true;
+        }
     }
 }

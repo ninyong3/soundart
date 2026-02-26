@@ -88,11 +88,6 @@ public class TargetPoint : MonoBehaviour
             }
             return;
         }
-        if (currentState == NoteState.Hit || currentState == NoteState.Missed)
-        {
-            currentState = NoteState.Idle;
-            spriteRenderer.color = Color.gray * 0.5f;
-        }
         float windowStart = myActivationTime - (timeWindow / 2); // 유효 시간 계산
         float windowEnd = myActivationTime + (timeWindow / 2);
         if (currentSongPosition >= windowStart && currentSongPosition <= windowEnd)
