@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("스테이지 데이터")]
@@ -155,5 +156,15 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
                 cardImages[i].sprite = allStageData[rightSpareIdx].coverImage;
 
         }
+    }
+    public void OnClickPlayButton()
+    {
+        if (allStageData.Count == 0)
+            return;
+        StageData currentStage = allStageData[currentStageIndex];
+        if (!string.IsNullOrEmpty(currentStage.gameSceneName))
+            SceneManager.LoadScene(currentStage.gameSceneName);
+        else
+            Debug.LogWarning("씬 이름이 작성되어 있지 않음");
     }
 }
