@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b493ca7d524ce384b8c46618096b4c2c, type: 3}
+  m_Name: stage4
+  m_EditorClassIdentifier: 
+  songTitle: stage4
+  composer: 
+  coverImage: {fileID: 0}
+  musicClip: {fileID: 0}
+  gameSceneName: 
+  bpm: 0
+  difficultyLevel: 0

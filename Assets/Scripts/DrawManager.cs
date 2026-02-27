@@ -216,4 +216,21 @@ public class DrawManager : MonoBehaviour
         }
         return false;
     }
+    /// <summary>
+    /// 그려진 선들만 모아서 반환
+    /// </summary> 
+    public List<LineRenderer> GetActiveDrawnLines()
+    {
+        List<LineRenderer> activeLines=new List<LineRenderer>();
+        foreach (GameObject lineObj in linePool)
+        {
+            if (lineObj.activeInHierarchy)
+            {
+                LineRenderer lr = lineObj.GetComponent<LineRenderer>();
+                if (lr != null && lr.positionCount > 0)
+                    activeLines.Add(lr);
+            }
+        }
+        return activeLines;
+    }
 }

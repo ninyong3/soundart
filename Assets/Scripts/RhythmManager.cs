@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.InputSystem;
+using NUnit.Framework;
 /// <summary>
 /// 개인 악보 시스템
 /// </summary>
@@ -21,6 +22,11 @@ public class RhythmManager : MonoBehaviour
     private bool isPaused=false;
     [Tooltip("실패 개수를 표시할 텍스트")]
     public TextMeshProUGUI missCountText;
+    [Header("저장 시스템 연결")]
+    public RecordManager recordManager;
+    [Tooltip("현재 스테이지의 고유 ID")]
+    public string currentStageID;
+    public DrawManager drawManager;
     private int totalEventCount = 0; // 전체 노트 개수
     private int processedEventCount = 0; // 지금까지 처리한 개수
     private int missCount = 0; // 실패 횟수
@@ -126,6 +132,11 @@ public class RhythmManager : MonoBehaviour
             Debug.Log(" Game Clear! ");
             if (clearPanel != null)
                 clearPanel.SetActive(true);
+            if (recordManager != null && drawManager != null)
+            {
+                System.Collections.Generic.List<LineRenderer> finalLines = drawManager.GetActiveDrawnLines();
+                recordManager.SavePlayData(currentStageID, finalLines, missCount);
+            }
         }
     }
     public void RetryGame()
