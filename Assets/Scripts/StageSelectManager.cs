@@ -14,6 +14,10 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
     public Image[] cardImages;
     public TextMeshProUGUI titleText;
     public TextMeshProUGUI composerText;
+    public TextMeshProUGUI songLengthText;
+    public TextMeshProUGUI difficultyText;
+    public TextMeshProUGUI rankText;
+    public TextMeshProUGUI bestScoreText;
     [Header("오디오 설정")]
     public AudioSource previewAudioSource;
     private Vector2[] targetPos = new Vector2[5];
@@ -26,6 +30,16 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
     private Vector2 startDragPos;
     void Start()
     {
+        if (allStageData != null)
+        {
+            foreach (StageData stage in allStageData)
+            {
+                if (stage != null)
+                {
+                    stage.LoadSavedData();
+                }
+            }
+        }
         for (int i = 0; i < 5; i++)
         {
             targetPos[i] = cards[i].anchoredPosition;
@@ -123,11 +137,23 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
             return;
         StageData centerData = allStageData[currentStageIndex];
         if (titleText != null)
-            titleText.text = allStageData[currentStageIndex].songTitle;
+            titleText.text = "제목: "+allStageData[currentStageIndex].songTitle;
         if (composerText != null)
-            composerText.text = allStageData[currentStageIndex].composer;
+            composerText.text = "작곡: "+allStageData[currentStageIndex].composer;
+        if(songLengthText != null)
+            songLengthText.text="곡 길이: "+allStageData[currentStageIndex].songLength;
+        if (difficultyText != null)
+            difficultyText.text = "난이도: "+allStageData[currentStageIndex].difficulty;
+        if(rankText != null)
+            rankText.text="당신의 등급: "+allStageData[currentStageIndex].rank;
+        if(bestScoreText != null)
+            bestScoreText.text = "최고 점수: "+allStageData[currentStageIndex].bestScore;
         if (previewAudioSource != null && centerData.musicClip != null)
         {
+            if(GameManager.Instance != null)
+            {
+                previewAudioSource.volume = GameManager.Instance.bgmVolume;
+            }
             if (previewAudioSource.clip != centerData.musicClip)
             {
                 previewAudioSource.clip = centerData.musicClip;
@@ -166,5 +192,9 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
             SceneManager.LoadScene(currentStage.gameSceneName);
         else
             Debug.LogWarning("씬 이름이 작성되어 있지 않음");
+    }
+    public void GoToTitle()
+    {
+        SceneManager.LoadScene("title");
     }
 }

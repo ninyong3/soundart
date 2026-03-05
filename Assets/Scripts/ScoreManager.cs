@@ -64,4 +64,16 @@ public class ScoreManager : MonoBehaviour
         yield return new WaitForSeconds(accuracyDisplayTime);
         accuracyText.text = "";
     }
+    public int GetScore()
+    {
+        return score;
+    }
+    public void ResetScoreManager()
+    {
+        score = 0;
+        combo = 0;
+        if (accuracyText != null)
+            accuracyText.text = "";
+        UpdateUI();
+    }
 }

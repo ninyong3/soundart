@@ -109,6 +109,12 @@ public class DrawManager : MonoBehaviour
         IsPositionInDrawingZone(startPositon, out SplineContainer startedSpline);
         currentLineObject=GetLineFromPool();
         currentLine = currentLineObject.GetComponent<LineRenderer>();
+        if(GameManager.Instance != null)
+        {
+            Color pickColor = GameManager.Instance.GetCurrentDrawColor();
+            currentLine.startColor=pickColor;
+            currentLine.endColor=pickColor;
+        }
         currentLineData = currentLineObject.GetComponent<LineData>();
         currentLineData.drawnOnSpline = startedSpline;
         currentEdgeCollider = currentLineObject.GetComponent<EdgeCollider2D>();

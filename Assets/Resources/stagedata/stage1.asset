@@ -14,9 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   songTitle: Pumped
   composer: Justin Mahar
+  songLength: "1\uBD84 25\uCD08"
+  difficulty: "\uC26C\uC6C0"
+  rank: S
+  bestScore: 3900
+  stageID: test
   coverImage: {fileID: 0}
   musicClip: {fileID: 8300000, guid: 474b98248515ffe45b92e8c89c84c5a7, type: 3}
   previewStartTime: 22
   gameSceneName: main
   bpm: 0
-  difficultyLevel: 0
