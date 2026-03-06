@@ -6,7 +6,11 @@ using UnityEngine.Rendering.Universal;
 [System.Serializable]
 public class SavedPointData { public float x, y; }
 [System.Serializable]
-public class SavedLineData { public List<SavedPointData> points = new List<SavedPointData>(); }
+public class SavedLineData 
+{ 
+    public List<SavedPointData> points = new List<SavedPointData>();
+    public string colorHex;
+}
 [System.Serializable]
 public class ClearRecord
 {
@@ -26,6 +30,7 @@ public class RecordManager : MonoBehaviour
         foreach(LineRenderer line in playedLines)
         {
             SavedLineData lineData = new SavedLineData();
+            lineData.colorHex = "#" + ColorUtility.ToHtmlStringRGBA(line.startColor);
             Vector3[] positions = new Vector3[line.positionCount];
             line.GetPositions(positions);
             foreach(Vector3 pos in positions)

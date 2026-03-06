@@ -106,6 +106,7 @@ public class DrawManager : MonoBehaviour
     }
     private void CreateNewLine(Vector3 startPositon)
     {
+        Debug.Log("¼± ±ß±â ½Ãµµ");
         IsPositionInDrawingZone(startPositon, out SplineContainer startedSpline);
         currentLineObject=GetLineFromPool();
         currentLine = currentLineObject.GetComponent<LineRenderer>();

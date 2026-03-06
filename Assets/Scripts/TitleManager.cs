@@ -24,5 +24,9 @@ public class TitleManager : MonoBehaviour
     {
         optionPanel.SetActive(false);
     }
+    public void GoToGallery()
+    {
+        SceneManager.LoadScene("Gallery");
+    }
 }
 

@@ -3151,7 +3151,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC131\uACF5\uAE30\uB85D \uBCF4\uAE30!"
+  m_text: "\uAE30\uB85D \uBCF4\uAE30!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3a92487c9b24ac45b7d2832adef3e23, type: 2}
   m_sharedMaterial: {fileID: 5259224672227495721, guid: c3a92487c9b24ac45b7d2832adef3e23, type: 2}
@@ -6005,7 +6005,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1723244631}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1715252881}
+        m_TargetAssemblyTypeName: TitleManager, Assembly-CSharp
+        m_MethodName: GoToGallery
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1723244631
 MonoBehaviour:
   m_ObjectHideFlags: 0
