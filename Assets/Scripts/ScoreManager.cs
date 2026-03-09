@@ -4,7 +4,7 @@ using System.Collections;
 public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance;
-    public enum HitAccuracy {Perfect, Good, Miss}
+    public enum HitAccuracy {Perfect, Great, Good, Bad, Miss}
     [Header("UI ¿¬°á")]
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI comboText;
@@ -30,10 +30,20 @@ public class ScoreManager : MonoBehaviour
             score += 300 * combo;
             ShowAccuracyText("Perfect!");
         }
+        else if (accuracy == HitAccuracy.Great)
+        {
+            score += 200 * combo;
+            ShowAccuracyText("Great!");
+        }
         else if (accuracy == HitAccuracy.Good)
         {
             score += 100 * combo;
             ShowAccuracyText("Good!");
+        }
+        else if (accuracy == HitAccuracy.Bad)
+        {
+            score += 50 * combo;
+            ShowAccuracyText("Bad..");
         }
         UpdateUI();
     }

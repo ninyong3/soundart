@@ -14,8 +14,10 @@ public class ColorPickerManager : MonoBehaviour, IPointerDownHandler, IDragHandl
     [Header("무지개 이미지를 띄울 곳")]
     public Image colorCircleImage;
     public Image[] allPresets;
+    [Header("사운드")]
+    public AudioClip presetSound;
     private Image currentPreset;
-    private Color currentColor=Color.white;
+    private Color currentColor = Color.white;
     private void Start()
     {
         hexInput.onEndEdit.AddListener(OnHexInputChanged);
@@ -23,7 +25,8 @@ public class ColorPickerManager : MonoBehaviour, IPointerDownHandler, IDragHandl
     }
     public void OpenPicker(Image presetImage)
     {
-        if(gameObject.activeSelf && currentPreset == presetImage)
+        SoundManager.Instance.PlaySFX(presetSound, 0f);
+        if (gameObject.activeSelf && currentPreset == presetImage)
         {
             gameObject.SetActive(false);
             return;

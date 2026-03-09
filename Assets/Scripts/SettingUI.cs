@@ -28,9 +28,9 @@ public class SettingUI : MonoBehaviour
     {
         if (GameManager.Instance != null)
         {
-            bgmSlider.value = GameManager.Instance.bgmVolume * 100f;
+            bgmSlider.value = SoundManager.Instance.bgmVolume * 100f;
             bgmInput.text = Mathf.RoundToInt(bgmSlider.value).ToString();
-            sfxSlider.value = GameManager.Instance.sfxVolume * 100f;
+            sfxSlider.value = SoundManager.Instance.sfxVolume * 100f;
             sfxInput.text = Mathf.RoundToInt(sfxSlider.value).ToString();
         }
         if(colorPickerWindow != null)
@@ -51,7 +51,7 @@ public class SettingUI : MonoBehaviour
     public void OnBGMSliderChanged(float value)
     {
         bgmInput.text=Mathf.RoundToInt(value).ToString();
-        GameManager.Instance.SetBGMVolume(value / 100f);
+        SoundManager.Instance.SetBGMVolume(value / 100f);
     }
     public void OnBGMInputChanged(string text)
     {
@@ -60,13 +60,13 @@ public class SettingUI : MonoBehaviour
             result = Mathf.Clamp(result, 0f, 100f); // 숫자가 0~100으로만 유지되게
             bgmInput.text=result.ToString();
             bgmSlider.value=result;
-            GameManager.Instance.SetBGMVolume(result/100f);
+            SoundManager.Instance.SetBGMVolume(result/100f);
         }
     }
     public void OnSFXSliderChanged(float value)
     {
         sfxInput.text = Mathf.RoundToInt(value).ToString();
-        GameManager.Instance.SetSFXVolume(value / 100f);
+        SoundManager.Instance.SetSFXVolume(value / 100f);
     }
     public void OnSFXInputChanged(string text)
     {
@@ -75,7 +75,7 @@ public class SettingUI : MonoBehaviour
             result = Mathf.Clamp(result, 0f, 100f); // 숫자가 0~100으로만 유지되게
             sfxInput.text = result.ToString();
             sfxSlider.value = result;
-            GameManager.Instance.SetSFXVolume(result / 100f);
+            SoundManager.Instance.SetSFXVolume(result / 100f);
         }
     }
     public void MovePickText(int index)

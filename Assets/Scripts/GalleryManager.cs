@@ -10,9 +10,14 @@ public class GalleryManager : MonoBehaviour
     [Header("구성 요소")]
     public Transform contentPanel;
     public GameObject galleryItemPrefab;
+    [Header("사운드")]
+    public AudioClip galleryBGM;
+    public AudioClip gallerySelectSound;
+    public AudioClip backToTitleSound;
     private void Start()
     {
         LoadGalleryItems();
+        SoundManager.Instance.PlayBGM(galleryBGM, 0f);
     }
     private void LoadGalleryItems()
     {
@@ -64,6 +69,7 @@ public class GalleryManager : MonoBehaviour
         Debug.Log("액자 클릭, 열어볼 데이터: "+jsonPath);
         GalleryDataKeeper.targetJsonPath=jsonPath;
         GalleryDataKeeper.targetStageID = stageID;
+        SoundManager.Instance.PlaySFX(gallerySelectSound, 0f);
         SceneManager.LoadScene("GalleryDetail");
     }
     private string GetSongTitle(string stageID)
@@ -78,6 +84,7 @@ public class GalleryManager : MonoBehaviour
 
     public void GoToTitle()
     {
+        SoundManager.Instance.PlaySFX(backToTitleSound, 0f);
         SceneManager.LoadScene("title");
     }
 }

@@ -155,6 +155,7 @@ MonoBehaviour:
   lineWidth: 0.8
   panSpeed: 1
   backgroundSprite: {fileID: 1848965641}
+  backToGallerySound: {fileID: 8300000, guid: 921b95578fddf6540abc44ecbc7bb08d, type: 3}
 --- !u!4 &133120442
 Transform:
   m_ObjectHideFlags: 0

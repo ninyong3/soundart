@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Mono.Cecil.Cil;
 public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("스테이지 데이터")]
@@ -18,8 +19,10 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
     public TextMeshProUGUI difficultyText;
     public TextMeshProUGUI rankText;
     public TextMeshProUGUI bestScoreText;
-    [Header("오디오 설정")]
-    public AudioSource previewAudioSource;
+    [Header("사운드")]
+    public AudioClip backToTitleSound;
+    public AudioClip stageSelectSound;
+    public AudioClip swipeSound;
     private Vector2[] targetPos = new Vector2[5];
     private Vector3[] targetScale = new Vector3[5];
     private float[] targetAlpha = { 0f, 1f, 1f, 1f, 0f };
@@ -87,6 +90,10 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
     {
         if (allStageData.Count == 0)
             return;
+        if (SoundManager.Instance != null && swipeSound != null)
+        {
+            SoundManager.Instance.PlaySFX(swipeSound, 0f);
+        }
         currentStageIndex = (currentStageIndex+1)%allStageData.Count;
         for (int i = 0; i < 5; i++)
         {
@@ -101,6 +108,10 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
     {
         if (allStageData.Count == 0)
             return;
+        if (SoundManager.Instance != null && swipeSound != null)
+        {
+            SoundManager.Instance.PlaySFX(swipeSound, 0f);
+        }
         currentStageIndex--;
         if (currentStageIndex < 0)
             currentStageIndex = allStageData.Count-1;
@@ -148,18 +159,9 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
             rankText.text="당신의 등급: "+allStageData[currentStageIndex].rank;
         if(bestScoreText != null)
             bestScoreText.text = "최고 점수: "+allStageData[currentStageIndex].bestScore;
-        if (previewAudioSource != null && centerData.musicClip != null)
+        if (centerData.musicClip != null)
         {
-            if(GameManager.Instance != null)
-            {
-                previewAudioSource.volume = GameManager.Instance.bgmVolume;
-            }
-            if (previewAudioSource.clip != centerData.musicClip)
-            {
-                previewAudioSource.clip = centerData.musicClip;
-                previewAudioSource.time = centerData.previewStartTime;
-                previewAudioSource.Play();
-            }
+            SoundManager.Instance.PlayBGM(centerData.musicClip, centerData.previewStartTime);
         }
         int count = allStageData.Count;
         int leftSpareIdx = (currentStageIndex - 2 + count * 2) % count;
@@ -188,13 +190,19 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
         if (allStageData.Count == 0)
             return;
         StageData currentStage = allStageData[currentStageIndex];
+        SoundManager.Instance.PlaySFX(stageSelectSound, 0f);
         if (!string.IsNullOrEmpty(currentStage.gameSceneName))
+        {
+            if (SoundManager.Instance != null)
+                SoundManager.Instance.StopBGM();
             SceneManager.LoadScene(currentStage.gameSceneName);
+        }
         else
             Debug.LogWarning("씬 이름이 작성되어 있지 않음");
     }
     public void GoToTitle()
     {
+        SoundManager.Instance.PlaySFX(backToTitleSound, 0f);
         SceneManager.LoadScene("title");
     }
 }

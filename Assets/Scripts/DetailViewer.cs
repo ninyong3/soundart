@@ -20,6 +20,8 @@ public class DetailViewer : MonoBehaviour
     [Header("카메라 이동 설정")]
     public float panSpeed = 1.0f;
     public SpriteRenderer backgroundSprite;
+    [Header("사운드")]
+    public AudioClip backToGallerySound;
     private void Start()
     {
         SpawnTrack();
@@ -113,6 +115,7 @@ public class DetailViewer : MonoBehaviour
     }
     public void GoBackToGallery()
     {
+        SoundManager.Instance.PlaySFX(backToGallerySound, 0f);
         SceneManager.LoadScene("Gallery");
     }
 }

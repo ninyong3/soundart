@@ -168,9 +168,13 @@ public class TargetPoint : MonoBehaviour
         float timeDifference = Mathf.Abs(myActivationTime - currentSongPosition);
         if (timeDifference <= 0.1f)
             ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Perfect);
-        else
+        else if (timeDifference <= 0.15f)
+            ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Great);
+        else if (timeDifference <= 0.2f)
             ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Good);
-        spriteRenderer.color = Color.green;
+        else
+            ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Bad);
+            spriteRenderer.color = Color.green;
         rhythmManager.ReportNoteFinished(this, false);
         currentEventIndex++;
         hasMovedCameraForThisEvent = false;

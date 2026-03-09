@@ -32,6 +32,12 @@ public class RhythmManager : MonoBehaviour
     public TextMeshProUGUI countdownText;
     [Header("스테이지 정보")]
     public StageData stageData;
+    [Header("효과음")]
+    public AudioClip pauseSound;
+    public AudioClip backSound;
+    public AudioClip restartSound;
+    public AudioClip countSound;
+    public AudioClip startSound;
     private int totalEventCount = 0; // 전체 노트 개수
     private int processedEventCount = 0; // 지금까지 처리한 개수
     private int missCount = 0; // 실패 횟수
@@ -158,22 +164,26 @@ public class RhythmManager : MonoBehaviour
     }
     public void RetryGame()
     {
+        SoundManager.Instance.PlaySFX(restartSound, 0f);
         Time.timeScale = 1f;
         isRetry = true;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     public void GoToStageSelect()
     {
+        SoundManager.Instance.PlaySFX(backSound, 0f);
         Time.timeScale = 1f;
         SceneManager.LoadScene("StageSelect");
     }
     public void GoToTitle()
     {
+        SoundManager.Instance.PlaySFX(backSound, 0f);
         Time.timeScale = 1f;
         SceneManager.LoadScene("title");
     }
     public void TogglePause()
     {
+        SoundManager.Instance.PlaySFX(pauseSound, 0f);
         isPaused = !isPaused; // 상태 뒤집기
         if(pausePanel != null)
         {
@@ -195,8 +205,8 @@ public class RhythmManager : MonoBehaviour
         Debug.Log("게임 시작!");
         if (audioSource != null && audioSource.clip != null)
         {
-            if(GameManager.Instance != null)
-                audioSource.volume = GameManager.Instance.bgmVolume;
+            if(SoundManager.Instance != null)
+                audioSource.volume = SoundManager.Instance.bgmVolume;
             audioSource.Play();
             isPlaying = true;
         }
@@ -208,11 +218,13 @@ public class RhythmManager : MonoBehaviour
         int count = 3;
         while (count > 0)
         {
+            SoundManager.Instance.PlaySFX(countSound, 0f);
             if (countdownText != null)
                 countdownText.text = count.ToString() + "!";
             yield return new WaitForSeconds(1f);
             count--;
         }
+        SoundManager.Instance.PlaySFX(startSound, 0f);
         if (countdownText != null)
             countdownText.text = "시작!";
         yield return new WaitForSeconds(0.5f);
@@ -237,8 +249,12 @@ public class RhythmManager : MonoBehaviour
             return "B";
         else if(missRate <= 0.35f)
             return "C+";
-        else if(missRate <= 0.5f)
+        else if(missRate <= 0.4f)
             return "C";
+        else if(missRate <= 0.45f)
+            return "D+";
+        else if(missRate <= 0.5f)
+            return "D";
         return "F";
     }
 }
