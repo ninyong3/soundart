@@ -18,9 +18,9 @@ MonoBehaviour:
   difficulty: "\uC26C\uC6C0"
   rank: S
   bestScore: 3900
-  stageID: test
+  stageID: Stage1
   coverImage: {fileID: 0}
   musicClip: {fileID: 8300000, guid: 474b98248515ffe45b92e8c89c84c5a7, type: 3}
   previewStartTime: 22
-  gameSceneName: main
+  gameSceneName: Stage1
   bpm: 0

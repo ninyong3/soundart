@@ -110,6 +110,11 @@ public class TargetPoint : MonoBehaviour
                 rhythmManager.ReportNoteFinished(this, true);
                 currentEventIndex++;
                 hasMovedCameraForThisEvent = false;
+                if(currentEventIndex < myEvents.Count)
+                {
+                    currentState=NoteState.Idle;
+                    spriteRenderer.color = Color.gray*0.5f;
+                }
             }
         }
     }
@@ -178,6 +183,11 @@ public class TargetPoint : MonoBehaviour
         rhythmManager.ReportNoteFinished(this, false);
         currentEventIndex++;
         hasMovedCameraForThisEvent = false;
+        if (currentEventIndex < myEvents.Count)
+        {
+            currentState = NoteState.Idle;
+            spriteRenderer.color = Color.gray * 0.5f;
+        }
     }
     public void ResetTarget()
     {

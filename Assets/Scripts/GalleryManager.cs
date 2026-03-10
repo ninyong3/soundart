@@ -77,7 +77,7 @@ public class GalleryManager : MonoBehaviour
         switch(stageID)
         {
             case "test": return "Pumped";
-            case "Stage1": return "Pumped";
+            case "Stage1": return "사람";
             default: return "무제";
         }
     }

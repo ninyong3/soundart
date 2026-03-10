@@ -229,18 +229,8 @@ MonoBehaviour:
   - activationTime: 0
     requiredPreviousNote: {fileID: 0}
     requiredSpline: {fileID: 0}
-    triggerCameraMove: 1
+    triggerCameraMove: 0
     moveCameraToIndex: 1
-  - activationTime: 19
-    requiredPreviousNote: {fileID: 0}
-    requiredSpline: {fileID: 0}
-    triggerCameraMove: 0
-    moveCameraToIndex: 0
-  - activationTime: 35
-    requiredPreviousNote: {fileID: 0}
-    requiredSpline: {fileID: 0}
-    triggerCameraMove: 0
-    moveCameraToIndex: 0
   timeWindow: 0.5
   startThreshold: 2
   approachCircle: {fileID: 7276423412975249736}

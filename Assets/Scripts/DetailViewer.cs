@@ -34,7 +34,7 @@ public class DetailViewer : MonoBehaviour
         {
             if (mapping.stageID == targetID)
             {
-                Instantiate(mapping.trackPrefab, new Vector3(-17.6f, 27.7f, 0f), Quaternion.identity);
+                Instantiate(mapping.trackPrefab, Vector3.zero, Quaternion.identity);
                 Debug.Log("트랙 소환 성공: " + targetID);
                 return;
             }

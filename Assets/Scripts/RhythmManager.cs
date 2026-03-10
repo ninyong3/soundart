@@ -77,6 +77,11 @@ public class RhythmManager : MonoBehaviour
         {
             return;
         }
+        if (!audioSource.isPlaying)
+        {
+            FinishGame();
+            return;
+        }
         songPosition = audioSource.time;
         foreach (TargetPoint note in allTargetPoints)
         {
@@ -119,10 +124,6 @@ public class RhythmManager : MonoBehaviour
         if (isMissed)
         {
             missCount++;
-        }
-        if (processedEventCount >= totalEventCount)
-        {
-            FinishGame();
         }
     }
     public TargetPoint GetLastProcessedNote()

@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using NUnit.Framework.Internal.Execution;
 public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance;
@@ -25,26 +26,19 @@ public class ScoreManager : MonoBehaviour
     public void AddHit(HitAccuracy accuracy)
     {
         combo++;
-        if (accuracy == HitAccuracy.Perfect)
+        int baseScore = 0;
+        string accuracyText="";
+        switch(accuracy)
         {
-            score += 300 * combo;
-            ShowAccuracyText("Perfect!");
+            case HitAccuracy.Perfect: baseScore = 300; accuracyText = "Perfect!"; break;
+            case HitAccuracy.Great: baseScore = 200; accuracyText = "Great!"; break;
+            case HitAccuracy.Good: baseScore = 100; accuracyText = "Good!"; break;
+            case HitAccuracy.Bad: baseScore = 50; accuracyText = "Bad.."; break;
         }
-        else if (accuracy == HitAccuracy.Great)
-        {
-            score += 200 * combo;
-            ShowAccuracyText("Great!");
-        }
-        else if (accuracy == HitAccuracy.Good)
-        {
-            score += 100 * combo;
-            ShowAccuracyText("Good!");
-        }
-        else if (accuracy == HitAccuracy.Bad)
-        {
-            score += 50 * combo;
-            ShowAccuracyText("Bad..");
-        }
+        float multiplier = Mathf.Min(5f, 1f + (combo / 10f));
+        int finalScore = (int)(baseScore * multiplier);
+        score += finalScore;
+        ShowAccuracyText(accuracyText);
         UpdateUI();
     }
     public void ResetCombo()
