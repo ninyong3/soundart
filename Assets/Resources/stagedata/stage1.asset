@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b493ca7d524ce384b8c46618096b4c2c, type: 3}
   m_Name: stage1
   m_EditorClassIdentifier: 
-  songTitle: Pumped
+  songTitle: Pumped!
   composer: Justin Mahar
   songLength: "1\uBD84 25\uCD08"
-  difficulty: "\uC26C\uC6C0"
-  rank: S
-  bestScore: 3900
+  difficulty: "\uBCF4\uD1B5"
+  rank: B
+  bestScore: 30777
   stageID: Stage1
   coverImage: {fileID: 0}
   musicClip: {fileID: 8300000, guid: 474b98248515ffe45b92e8c89c84c5a7, type: 3}

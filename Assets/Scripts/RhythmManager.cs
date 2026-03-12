@@ -38,6 +38,8 @@ public class RhythmManager : MonoBehaviour
     public AudioClip restartSound;
     public AudioClip countSound;
     public AudioClip startSound;
+    [Header("테스트용")]
+    public bool isAutoMode=false;
     private int totalEventCount = 0; // 전체 노트 개수
     private int processedEventCount = 0; // 지금까지 처리한 개수
     private int missCount = 0; // 실패 횟수

@@ -231,8 +231,9 @@ MonoBehaviour:
     requiredSpline: {fileID: 0}
     triggerCameraMove: 0
     moveCameraToIndex: 1
-  timeWindow: 0.5
-  startThreshold: 2
+  timeWindow: 0.6
+  startThreshold: 2.4
   approachCircle: {fileID: 7276423412975249736}
   approachTime: 0.6
   startScale: 2
+  isAutoPaly: 0

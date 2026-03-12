@@ -96,7 +96,11 @@ public class TargetPoint : MonoBehaviour
             {
                 currentState = NoteState.Active; // 활성화
                 spriteRenderer.color = Color.white;
-                TriggerCameraMoveOnTurn();
+            }
+            if(rhythmManager.isAutoMode && currentState == NoteState.Active && currentSongPosition >=  myActivationTime)
+            {
+                Debug.Log("봇이 침");
+                SetHit();
             }
         }
         else if (currentSongPosition > windowEnd)
@@ -107,13 +111,14 @@ public class TargetPoint : MonoBehaviour
                 currentState = NoteState.Missed; // 지나침(실패)
                 spriteRenderer.color = Color.red;
                 ScoreManager.Instance.ResetCombo();
+                TriggerCameraMoveOnTurn();
                 rhythmManager.ReportNoteFinished(this, true);
                 currentEventIndex++;
                 hasMovedCameraForThisEvent = false;
                 if(currentEventIndex < myEvents.Count)
                 {
                     currentState=NoteState.Idle;
-                    spriteRenderer.color = Color.gray*0.5f;
+                    StartCoroutine(ResetColorAfterDelay());
                 }
             }
         }
@@ -171,22 +176,23 @@ public class TargetPoint : MonoBehaviour
         float currentSongPosition = rhythmManager.songPosition;
         float myActivationTime = myEvents[currentEventIndex].activationTime;
         float timeDifference = Mathf.Abs(myActivationTime - currentSongPosition);
-        if (timeDifference <= 0.1f)
+        if (timeDifference <= 0.15f)
             ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Perfect);
-        else if (timeDifference <= 0.15f)
-            ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Great);
         else if (timeDifference <= 0.2f)
+            ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Great);
+        else if (timeDifference <= 0.25f)
             ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Good);
         else
             ScoreManager.Instance.AddHit(ScoreManager.HitAccuracy.Bad);
-            spriteRenderer.color = Color.green;
+        spriteRenderer.color = Color.green;
+        TriggerCameraMoveOnTurn();
         rhythmManager.ReportNoteFinished(this, false);
         currentEventIndex++;
         hasMovedCameraForThisEvent = false;
         if (currentEventIndex < myEvents.Count)
         {
             currentState = NoteState.Idle;
-            spriteRenderer.color = Color.gray * 0.5f;
+            StartCoroutine(ResetColorAfterDelay());
         }
     }
     public void ResetTarget()
@@ -209,5 +215,13 @@ public class TargetPoint : MonoBehaviour
             CameraController.Instance.MoveToView(currentEvent.moveCameraToIndex);
         }
         hasMovedCameraForThisEvent = true;
+    }
+    private System.Collections.IEnumerator ResetColorAfterDelay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        if(currentState == NoteState.Idle)
+        {
+            spriteRenderer.color = Color.gray * 0.5f;
+        }
     }
 }
