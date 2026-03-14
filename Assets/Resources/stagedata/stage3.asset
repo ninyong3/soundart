@@ -12,10 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b493ca7d524ce384b8c46618096b4c2c, type: 3}
   m_Name: stage3
   m_EditorClassIdentifier: 
-  songTitle: stage3
-  composer: 
-  coverImage: {fileID: 0}
+  songTitle: '?'
+  composer: '?'
+  songLength: '?'
+  difficulty: '?'
+  rank: 
+  bestScore: 
+  stageID: Stage3
+  coverImage: {fileID: 21300000, guid: c591d74186033c944aafddba77c7b9a4, type: 3}
   musicClip: {fileID: 0}
+  previewStartTime: 0
   gameSceneName: 
   bpm: 0
-  difficultyLevel: 0

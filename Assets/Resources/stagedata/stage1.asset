@@ -19,7 +19,7 @@ MonoBehaviour:
   rank: B
   bestScore: 30777
   stageID: Stage1
-  coverImage: {fileID: 0}
+  coverImage: {fileID: 21300000, guid: 2c33e63fe26ce694896e4fa148245974, type: 3}
   musicClip: {fileID: 8300000, guid: 474b98248515ffe45b92e8c89c84c5a7, type: 3}
   previewStartTime: 22
   gameSceneName: Stage1

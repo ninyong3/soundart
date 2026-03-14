@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b493ca7d524ce384b8c46618096b4c2c, type: 3}
   m_Name: stage2
   m_EditorClassIdentifier: 
-  songTitle: stage2
-  composer: 
-  songLength: 
-  difficulty: 
-  rank: 
-  bestScore: 
-  coverImage: {fileID: 0}
-  musicClip: {fileID: 0}
-  previewStartTime: 0
+  songTitle: City story
+  composer: "\uAE40\uD604\uC815"
+  songLength: "1\uBD84 41\uCD08"
+  difficulty: "\uBCF4\uD1B5"
+  rank: '-'
+  bestScore: 0
+  stageID: Stage2
+  coverImage: {fileID: 21300000, guid: c08ee775f5edb0644855ff7cfe65d36c, type: 3}
+  musicClip: {fileID: 8300000, guid: 84efcbf666c183040ab64891673259fc, type: 3}
+  previewStartTime: 23
   gameSceneName: 
   bpm: 0
