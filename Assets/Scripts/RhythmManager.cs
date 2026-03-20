@@ -1,9 +1,11 @@
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using System.Runtime.InteropServices;
 using TMPro;
+using Unity.Mathematics;
+using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.InputSystem;
-using NUnit.Framework;
-using System.Collections;
+using UnityEngine.SceneManagement;
+using UnityEngine.Splines;
 /// <summary>
 /// 개인 악보 시스템
 /// </summary>
@@ -38,6 +40,21 @@ public class RhythmManager : MonoBehaviour
     public AudioClip restartSound;
     public AudioClip countSound;
     public AudioClip startSound;
+    [Header("유도 점 설정")]
+    public GameObject gudieDotPrefab;
+    public int dotJumpSteps = 5;
+    public float approachTime = 1.0f;
+    [Tooltip("최상위 스플라인 컨테이너")]
+    public UnityEngine.Splines.SplineContainer mainSplineContainer;
+    [Tooltip("노트와 길이 연결됐다고 인정할 거리")]
+    public float pathConnectionThreshold = 1.5f;
+    private GameObject instantiatedDot;
+    private TargetPoint currentGuideNote = null;
+    private int currentGuideEventIndex = -1;
+    private float dynamicApproachTime = 1f;
+    private UnityEngine.Splines.Spline activeSpline = null;
+    private float guideStartT = 0f;
+    private float guideEndT = 1f;
     [Header("테스트용")]
     public bool isAutoMode=false;
     private int totalEventCount = 0; // 전체 노트 개수
@@ -66,6 +83,11 @@ public class RhythmManager : MonoBehaviour
             }
         }
         Debug.Log($"총 이벤트 개수: {totalEventCount}개");
+        if (gudieDotPrefab != null && instantiatedDot == null)
+        {
+            instantiatedDot = Instantiate(gudieDotPrefab);
+            instantiatedDot.SetActive(false);
+        }
         ResetAllTargets();
         StartCoroutine(StartCountdownRoutine());
     }
@@ -89,6 +111,7 @@ public class RhythmManager : MonoBehaviour
         {
             note.UpdateTiming(songPosition);
         }
+        UpdateGuideDot();
     }
     ///<summary>
     ///모든 노트 초기화(다시하기용)
@@ -100,6 +123,12 @@ public class RhythmManager : MonoBehaviour
         processedEventCount = 0;
         missCount = 0;
         isGameEnded = false;
+        currentGuideNote = null;
+        activeSpline = null;
+        if (instantiatedDot != null)
+        {
+            instantiatedDot.SetActive(false);
+        }
         if(clearPanel != null)
             clearPanel.SetActive(false);
         if(missCountText != null)
@@ -259,5 +288,146 @@ public class RhythmManager : MonoBehaviour
         else if(missRate <= 0.5f)
             return "D";
         return "F";
+    }
+    private void UpdateGuideDot()
+    {
+        if(instantiatedDot == null)
+            return;
+        if(currentGuideNote  == null || currentGuideNote.GetState() == NoteState.Missed || currentGuideNote.GetState() == NoteState.Hit || currentGuideNote.GetCurrentEventIndex() != currentGuideEventIndex)
+        {
+            currentGuideNote = null;
+            activeSpline = null;
+            TargetPoint nextNoteCandidate = null;
+            float earliestTIme =float.MaxValue;
+            foreach (TargetPoint note in allTargetPoints)
+            {
+                if (note.myEvents.Count > 0 && note.GetState() != NoteState.Hit && note.GetState() != NoteState.Missed)
+                {
+                    int idx=note.GetCurrentEventIndex();
+                    if(idx >= note.myEvents.Count)
+                        continue;
+                   float noteTime = note.myEvents[idx].activationTime;
+                   if(noteTime < earliestTIme)
+                   {
+                        earliestTIme = noteTime;
+                        nextNoteCandidate = note;
+                   }
+                }
+            }
+            if (nextNoteCandidate != null)
+            {
+                currentGuideNote = nextNoteCandidate;
+                currentGuideEventIndex = currentGuideNote.GetCurrentEventIndex();
+                float targetTime = currentGuideNote.myEvents[currentGuideEventIndex].activationTime;
+                dynamicApproachTime = targetTime - songPosition;
+                if(dynamicApproachTime < approachTime)
+                    dynamicApproachTime = approachTime;
+                TargetPoint requiredPrev = currentGuideNote.myEvents[currentGuideEventIndex].requiredPreviousNote;
+                FindBestSplinePath(requiredPrev, currentGuideNote);
+            }
+        }
+        if (currentGuideNote != null)
+        {
+            int currentIdx=currentGuideNote.GetCurrentEventIndex();
+            TargetPoint reqPrev=currentGuideNote.myEvents[currentIdx].requiredPreviousNote;
+            if (reqPrev != null && activeSpline == null)
+            {
+                instantiatedDot.SetActive(false);
+                return;
+            }
+            float activationTime = currentGuideNote.myEvents[currentIdx].activationTime;
+            float timeRemaining = activationTime - songPosition;
+            float progress = 1f - (timeRemaining / dynamicApproachTime);
+            if (progress < 0f || progress > 1.2f)
+            {
+                instantiatedDot.SetActive(false);
+            }
+            else
+            {
+                float clampedProgress = Mathf.Clamp01(progress);
+                int currentStep = Mathf.FloorToInt(clampedProgress* dotJumpSteps);
+                Vector3 targetPos;
+                if (reqPrev == null)
+                    targetPos = currentGuideNote.transform.position;
+                else if (currentStep <= 0)
+                    targetPos = reqPrev.transform.position;
+                else if (currentStep >= dotJumpSteps)
+                    targetPos = currentGuideNote.transform.position;
+                else
+                {
+                    float t = (float)currentStep / dotJumpSteps;
+                    if (activeSpline == null)
+                    {
+                        targetPos = Vector3.Lerp(reqPrev.transform.position, currentGuideNote.transform.position, t);
+                    }
+                    else
+                    {
+                        float currentT = Mathf.Lerp(guideStartT, guideEndT, t);
+                        currentT = currentT % 1f;
+                        if (currentT < 0f)
+                            currentT += 1f;
+                        float3 localPos = SplineUtility.EvaluatePosition(activeSpline, currentT);
+                        targetPos = mainSplineContainer.transform.TransformPoint(localPos);
+                    }
+                }
+                float popScale = 1f + Mathf.Abs(Mathf.Sin(progress * Mathf.PI * dotJumpSteps)) * 0.5f;
+                instantiatedDot.transform.localScale= Vector3.one*popScale;
+                instantiatedDot.transform.position = targetPos;
+                instantiatedDot.SetActive(true);
+            }
+        }
+        else
+        {
+            instantiatedDot.SetActive(false);
+        }
+    }
+    private void FindBestSplinePath(TargetPoint startNote, TargetPoint endNote)
+    {
+        activeSpline = null;
+        if (mainSplineContainer == null && endNote == null)
+        {
+            return;
+        }
+        Vector3 endWorldPos = endNote.transform.position;
+        Vector3 endLocal = mainSplineContainer.transform.InverseTransformPoint(endWorldPos);
+        float bestScore = float.MaxValue;
+        foreach (Spline spline in mainSplineContainer.Splines)
+        {
+            if (spline == null || spline.Count < 2) continue;
+            try
+            {
+                UnityEngine.Splines.SplineUtility.GetNearestPoint(spline, endLocal, out float3 nearestEnd, out float endT);
+                float distToEnd = math.distance(endLocal, nearestEnd);
+                float score = distToEnd;
+                float startT = endT;
+                if (startNote != null)
+                {
+                    Vector3 startWorldPos = startNote.transform.position;
+                    float3 startLocal = mainSplineContainer.transform.InverseTransformPoint(startWorldPos);
+                    SplineUtility.GetNearestPoint(spline, startLocal, out float3 nearestStart, out startT);
+                    float distToStart = math.distance(startLocal, nearestStart);
+                    score = distToStart + distToEnd;
+                }
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    activeSpline = spline;
+                    guideStartT = startT;
+                    guideEndT = endT;
+                }
+            }
+            catch(System.Exception e)
+            {
+                Debug.LogWarning($"스플라인 길 찾다가 에러 발생!: {e.Message}");
+                continue;
+            }
+        }
+        if(activeSpline != null && activeSpline.Closed)
+        {
+            if (guideStartT - guideEndT > 0.5f)
+                guideEndT += 1f;
+            else if(guideEndT - guideStartT > 0.5f)
+                guideStartT += 1f;
+        }
     }
 }

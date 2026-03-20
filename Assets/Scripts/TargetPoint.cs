@@ -224,4 +224,6 @@ public class TargetPoint : MonoBehaviour
             spriteRenderer.color = Color.gray * 0.5f;
         }
     }
+    public int GetCurrentEventIndex()
+        { return currentEventIndex; }
 }

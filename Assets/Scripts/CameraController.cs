@@ -8,9 +8,9 @@ public class CameraController : MonoBehaviour
     public Transform[] viewTargets;
     [Header("이동 및 줌 설정")]
     [Tooltip("이동하는데 걸리는 시간")]
-    public float smoothTime = 0.3f;
+    public float smoothTime = 0.4f;
     [Tooltip("줌(카메라 사이즈) 변경 속도")]
-    public float zoomSpeed = 2.0f;
+    public float zoomSpeed = 1.5f;
     private Vector3 velocity = Vector3.zero;
     private int currentIndex = 0;
     private Camera myCam;

@@ -14,6 +14,10 @@ public class GalleryManager : MonoBehaviour
     public AudioClip galleryBGM;
     public AudioClip gallerySelectSound;
     public AudioClip backToTitleSound;
+    public AudioClip deleteSound;
+    public TextMeshProUGUI DeleteModeText;
+    private bool isDeleteMode = false;
+    private System.Collections.Generic.List<GameObject> allDeleteButtons = new System.Collections.Generic.List<GameObject>();
     private void Start()
     {
         LoadGalleryItems();
@@ -61,6 +65,18 @@ public class GalleryManager : MonoBehaviour
             {
                 string jsonPath = imagePath.Replace(".png", ".json");
                 button.onClick.AddListener(() => OnFrameClicked(jsonPath, stageID));
+                Transform deleteBtnTransform = newFrame.transform.Find("DeleteButton");
+                if (deleteBtnTransform != null)
+                {
+                    GameObject deleteBtnObj = deleteBtnTransform.gameObject;
+                    deleteBtnObj.SetActive(false);
+                    allDeleteButtons.Add(deleteBtnObj);
+                    Button deleteBtn = deleteBtnObj.GetComponent<Button>();
+                    if (deleteBtn != null)
+                    {
+                        deleteBtn.onClick.AddListener(() => DeleteGalleryItem(imagePath, jsonPath, newFrame, deleteBtnObj));
+                    }
+                }
             }
         }
     }
@@ -78,6 +94,7 @@ public class GalleryManager : MonoBehaviour
         {
             case "test": return "Pumped";
             case "Stage1": return "사람";
+            case "Stage2": return "물고기";
             default: return "무제";
         }
     }
@@ -86,5 +103,28 @@ public class GalleryManager : MonoBehaviour
     {
         SoundManager.Instance.PlaySFX(backToTitleSound, 0f);
         SceneManager.LoadScene("title");
+    }
+    public void ToggleDeleteMode()
+    {
+        isDeleteMode= !isDeleteMode;
+        if (isDeleteMode)
+            DeleteModeText.text = "삭제 모드\n활성화 중";
+        else
+            DeleteModeText.text = "삭제 모드\n비활성화 중";
+        allDeleteButtons.RemoveAll(btn => btn == null);
+        foreach(GameObject btnObj in allDeleteButtons)
+        {
+            btnObj.SetActive(isDeleteMode);
+        }
+    }
+    private void DeleteGalleryItem(string imgPath, string jsonPath,GameObject frameObj, GameObject deleteBtnObj)
+    {
+        if(File.Exists(imgPath)) 
+            File.Delete(imgPath);
+        if(File.Exists (jsonPath))
+            File.Delete(jsonPath);
+        allDeleteButtons.Remove(deleteBtnObj);
+        Destroy(frameObj);
+        SoundManager.Instance.PlaySFX (deleteSound, 0f);
     }
 }

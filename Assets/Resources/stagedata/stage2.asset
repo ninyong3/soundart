@@ -15,12 +15,12 @@ MonoBehaviour:
   songTitle: City story
   composer: "\uAE40\uD604\uC815"
   songLength: "1\uBD84 41\uCD08"
-  difficulty: "\uBCF4\uD1B5"
-  rank: '-'
-  bestScore: 0
+  difficulty: "\uC5B4\uB824\uC6C0"
+  rank: B
+  bestScore: 32082
   stageID: Stage2
   coverImage: {fileID: 21300000, guid: c08ee775f5edb0644855ff7cfe65d36c, type: 3}
   musicClip: {fileID: 8300000, guid: 84efcbf666c183040ab64891673259fc, type: 3}
   previewStartTime: 23
-  gameSceneName: 
+  gameSceneName: Stage2
   bpm: 0

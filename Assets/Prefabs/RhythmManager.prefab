@@ -49,14 +49,25 @@ MonoBehaviour:
   songPosition: 0
   playbackSpeed: 1
   clearPanel: {fileID: 0}
-  overPanel: {fileID: 0}
   pausePanel: {fileID: 0}
   missCountText: {fileID: 0}
+  gradeText: {fileID: 0}
   recordManager: {fileID: 0}
-  currentStageID: test
   drawManager: {fileID: 0}
   countdownPanel: {fileID: 0}
   countdownText: {fileID: 0}
+  stageData: {fileID: 0}
+  pauseSound: {fileID: 0}
+  backSound: {fileID: 0}
+  restartSound: {fileID: 0}
+  countSound: {fileID: 0}
+  startSound: {fileID: 0}
+  gudieDotPrefab: {fileID: 9163449694843927598, guid: a874c4f9650fe5840885380835787681, type: 3}
+  dotJumpSteps: 5
+  approachTime: 1
+  mainSplineContainer: {fileID: 0}
+  pathConnectionThreshold: 1.5
+  isAutoMode: 0
   audioSource: {fileID: 8619834545571514105}
 --- !u!82 &8619834545571514105
 AudioSource:
