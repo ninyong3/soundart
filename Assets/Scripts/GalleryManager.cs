@@ -95,6 +95,8 @@ public class GalleryManager : MonoBehaviour
             case "test": return "Pumped";
             case "Stage1": return "사람";
             case "Stage2": return "물고기";
+            case "Stage3": return "용";
+            case "Stage4": return "소녀";
             default: return "무제";
         }
     }

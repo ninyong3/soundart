@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b493ca7d524ce384b8c46618096b4c2c, type: 3}
   m_Name: stage3
   m_EditorClassIdentifier: 
-  songTitle: '?'
-  composer: '?'
-  songLength: '?'
-  difficulty: '?'
+  songTitle: Holding Back
+  composer: "\uAE40\uC131\uC6D0"
+  songLength: "1\uBD84 30\uCD08"
+  difficulty: "\uB9E4\uC6B0 \uC5B4\uB824\uC6C0"
   rank: 
   bestScore: 
   stageID: Stage3
   coverImage: {fileID: 21300000, guid: c591d74186033c944aafddba77c7b9a4, type: 3}
-  musicClip: {fileID: 0}
+  musicClip: {fileID: 8300000, guid: 030c67bb84c80314e93d8ecb1a0161ce, type: 3}
   previewStartTime: 0
-  gameSceneName: 
+  gameSceneName: Stage3
   bpm: 0

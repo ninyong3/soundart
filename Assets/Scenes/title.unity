@@ -5913,7 +5913,8 @@ MonoBehaviour:
     \uC790\uC720\uC774\uC6A9\n\uCC38\uC0C8\uC758 \uBBF8\uB274\uC5D0\uD2B8/\uAE30\uC99D
     \uBC15\uC720\uC9C4/\uACF5\uC720\uB9C8\uB2F9/\uAE30\uC99D\uC800\uC791\uBB3C \uC790\uC720\uC774\uC6A9\nCity
     story/\uAE30\uC99D \uAE40\uD604\uC815/\uACF5\uC720\uB9C8\uB2F9/\uAE30\uC99D\uC800\uC791\uBB3C
-    \uC790\uC720\uC774\uC6A9 \t\n\n\n\n\n\n\n\n"
+    \uC790\uC720\uC774\uC6A9 \t\nHolding Back/\uAE30\uC99D \uAE40\uC131\uC6D0/\uACF5\uC720\uB9C8\uB2F9/\uAE30\uC99D\uC800\uC791\uBB3C
+    \uC790\uC720\uC774\uC6A9\n\n\n\n\n\n\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3a92487c9b24ac45b7d2832adef3e23, type: 2}
   m_sharedMaterial: {fileID: 5259224672227495721, guid: c3a92487c9b24ac45b7d2832adef3e23, type: 2}
