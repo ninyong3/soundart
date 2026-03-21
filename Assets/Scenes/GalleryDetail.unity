@@ -155,6 +155,8 @@ MonoBehaviour:
     trackPrefab: {fileID: 357438985309578278, guid: 2233fd3dbec02fb45b2f249c1cc4e067, type: 3}
   - stageID: Stage2
     trackPrefab: {fileID: 5711962180288506364, guid: 7bbd2a6c6facc0843b9ce13fb83f88b7, type: 3}
+  - stageID: Stage3
+    trackPrefab: {fileID: 6315061656834115057, guid: 13b54d90454296c41b85bc07e3f05584, type: 3}
   lineMaterial: {fileID: 2100000, guid: d468c380f4e5bc346ace3a41b62a3432, type: 2}
   lineWidth: 0.8
   panSpeed: 1

@@ -57,6 +57,8 @@ public class RhythmManager : MonoBehaviour
     private float guideEndT = 1f;
     [Header("테스트용")]
     public bool isAutoMode=false;
+    [Header("튜토리얼 연결")]
+    public TutorialManager tutorialManager;
     private int totalEventCount = 0; // 전체 노트 개수
     private int processedEventCount = 0; // 지금까지 처리한 개수
     private int missCount = 0; // 실패 횟수
@@ -262,6 +264,8 @@ public class RhythmManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         if (countdownPanel != null)
             countdownPanel.SetActive(false);
+        if(tutorialManager != null)
+            tutorialManager.CheckAndStartTutorial();
         GameStart();
     }
     private string CalculateGrade()

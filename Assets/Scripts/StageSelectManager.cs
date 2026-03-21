@@ -30,6 +30,10 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
     public float swipeThreshold = 50f; // 넘어가기 위해 필요한 드래그 정도
     public float moveSpeed = 10f;
     private Vector2 startDragPos;
+    [Header("해금 시스템 설정")]
+    public Sprite lockedCoverImage;
+    public Button playButton;
+    private bool[] unlockedStatus;
     void Start()
     {
         if (allStageData != null)
@@ -49,6 +53,26 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
             Color c = cardImages[i].color;
             c.a=targetAlpha[i];
             cardImages[i].color = c;
+        }
+        unlockedStatus = new bool[allStageData.Count];
+        for(int i=0;i<allStageData.Count;i++)
+        {
+            if(i == 0)
+            {
+                unlockedStatus[i] = true;
+            }
+            else
+            {
+                StageData prevStage=allStageData[i-1];
+                if(!string.IsNullOrEmpty(prevStage.rank) && prevStage.rank != "F" && prevStage.rank != "-")
+                {
+                    unlockedStatus[i] = true;
+                }
+                else
+                {
+                    unlockedStatus[i] = false;
+                }
+            }
         }
         UpdateCardData();
         UpdateCardHierarchy();
@@ -146,41 +170,60 @@ public class StageSelectManager : MonoBehaviour, IBeginDragHandler, IDragHandler
         if (allStageData.Count == 0)
             return;
         StageData centerData = allStageData[currentStageIndex];
-        if (titleText != null)
-            titleText.text = "제목: "+allStageData[currentStageIndex].songTitle;
-        if (composerText != null)
-            composerText.text = "작곡: "+allStageData[currentStageIndex].composer;
-        if(songLengthText != null)
-            songLengthText.text="곡 길이: "+allStageData[currentStageIndex].songLength;
-        if (difficultyText != null)
-            difficultyText.text = "난이도: "+allStageData[currentStageIndex].difficulty;
-        if(rankText != null)
-            rankText.text="당신의 등급: "+allStageData[currentStageIndex].rank;
-        if(bestScoreText != null)
-            bestScoreText.text = "최고 점수: "+allStageData[currentStageIndex].bestScore;
-        if (centerData.musicClip != null)
+        bool isCenterUnlocked = unlockedStatus[currentStageIndex];
+        if (isCenterUnlocked)
         {
-            SoundManager.Instance.PlayBGM(centerData.musicClip, centerData.previewStartTime);
+            if (titleText != null)
+                titleText.text = "제목: " + allStageData[currentStageIndex].songTitle;
+            if (composerText != null)
+                composerText.text = "작곡: " + allStageData[currentStageIndex].composer;
+            if (songLengthText != null)
+                songLengthText.text = "곡 길이: " + allStageData[currentStageIndex].songLength;
+            if (difficultyText != null)
+                difficultyText.text = "난이도: " + allStageData[currentStageIndex].difficulty;
+            if (rankText != null)
+                rankText.text = "당신의 등급: " + allStageData[currentStageIndex].rank;
+            if (bestScoreText != null)
+                bestScoreText.text = "최고 점수: " + allStageData[currentStageIndex].bestScore;
+            if (playButton != null)
+                playButton.interactable = true;
+            if (centerData.musicClip != null)
+            {
+                SoundManager.Instance.PlayBGM(centerData.musicClip, centerData.previewStartTime);
+            }
+        }
+        else
+        {
+            if (titleText != null)
+                titleText.text = "제목: ???";
+            if (composerText != null)
+                composerText.text = "작곡: ???";
+            if (songLengthText != null)
+                songLengthText.text = "곡 길이: ???";
+            if (difficultyText != null)
+                difficultyText.text = "난이도: ???";
+            if (rankText != null)
+                rankText.text = "당신의 등급: -";
+            if (bestScoreText != null)
+                bestScoreText.text = "최고 점수: 0";
+            if (playButton != null)
+                playButton.interactable = false;
         }
         int count = allStageData.Count;
-        int leftSpareIdx = (currentStageIndex - 2 + count * 2) % count;
-        int leftIdx = (currentStageIndex - 1 + count) % count;
-        int centerIdx = currentStageIndex;
-        int rightIdx = (currentStageIndex + 1) % count;
-        int rightSpareIdx = (currentStageIndex + 2) % count;
+        int[] dataIndices = new int[5];
+        dataIndices[0] = (currentStageIndex - 2 + count * 2) % count;
+        dataIndices[1] = (currentStageIndex - 1 + count) % count;
+        dataIndices[2] = currentStageIndex;
+        dataIndices[3] = (currentStageIndex + 1) % count;
+        dataIndices[4] = (currentStageIndex + 2) % count;
         for(int i=0;i<5;i++)
         {
             int pos = currentPositions[i];
-            if (pos == 0)
-                cardImages[i].sprite = allStageData[leftSpareIdx].coverImage;
-            else if (pos == 1)
-                cardImages[i].sprite = allStageData[leftIdx].coverImage;
-            else if(pos == 2)
-                cardImages[i].sprite = allStageData[centerIdx].coverImage;
-            else if(pos == 3)
-                cardImages[i].sprite = allStageData[rightIdx].coverImage;
-            else if (pos == 4)
-                cardImages[i].sprite = allStageData[rightSpareIdx].coverImage;
+            int dataIdx=dataIndices[pos];
+            if (unlockedStatus[dataIdx])
+                cardImages[i].sprite = allStageData[dataIdx].coverImage;
+            else
+                cardImages[i].sprite = lockedCoverImage;
 
         }
     }
